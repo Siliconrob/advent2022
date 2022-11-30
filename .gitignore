@@ -156,3 +156,5 @@ pyvenv.cfg
 share/
 .idea/*.xml
 *.iml
+.idea/advent2022.iml
+.idea/misc.xml
