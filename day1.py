@@ -26,9 +26,9 @@ if __name__ == '__main__':
     calorie_sums = [sum(elves[elf]) for elf in elves]
     calorie_sums.sort()
 
-    max_total_calories = calorie_sums[-1]
-    print(max_total_calories)
+    part1 = calorie_sums[-1]
+    print(f'Part 1: {part1}')
 
-    top = calorie_sums[-3:]
-    print(sum(top))
+    part2 = sum(calorie_sums[-3:])
+    print(f'Part 2: {part2}')
 
