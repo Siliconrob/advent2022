@@ -2,12 +2,11 @@ import itertools
 from aocd import get_data
 
 if __name__ == '__main__':
-    data = get_data(day=1, year=2022).splitlines()
-    # data = ['1000', '2000', '3000', '', '4000', '', '5000', '6000', '', '7000', '8000', '9000', '', '10000']
+    # data = get_data(day=2, year=2022).splitlines()
+    data = ['1000', '2000', '3000', '', '4000', '', '5000', '6000', '', '7000', '8000', '9000', '', '10000']
 
     elves = {}
-    current_line = 0
-    current_elf = 0
+    current_line, current_elf = 0
 
     while current_line < len(data):
         current_line_input = data[current_line]
