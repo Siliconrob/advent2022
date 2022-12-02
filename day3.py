@@ -83,17 +83,17 @@ def player_result(input: Round):
     return player1_action, player2_action
 
 
-def play_round_part(player1_points: PlayerAction, player2_points: PlayerAction) -> Score:
-    if player1_points == player2_points:
-        return Score(player1_points.value + Result.Tie.value, player2_points.value + Result.Tie.value)
-    if player1_points == PlayerAction.Rock and player2_points == PlayerAction.Scissors:
-        return Score(player1_points.value + Result.Win.value, player2_points.value)
-    if player1_points == PlayerAction.Scissors and player2_points == PlayerAction.Paper:
-        return Score(player1_points.value + Result.Win.value, player2_points.value)
-    if player1_points == PlayerAction.Paper and player2_points == PlayerAction.Rock:
-        return Score(player1_points.value + Result.Win.value, player2_points.value)
+def play_round_part(player1_action: PlayerAction, player2_action: PlayerAction) -> Score:
+    if player1_action == player2_action:
+        return Score(player1_action.value + Result.Tie.value, player2_action.value + Result.Tie.value)
+    if player1_action == PlayerAction.Rock and player2_action == PlayerAction.Scissors:
+        return Score(player1_action.value + Result.Win.value, player2_action.value)
+    if player1_action == PlayerAction.Scissors and player2_action == PlayerAction.Paper:
+        return Score(player1_action.value + Result.Win.value, player2_action.value)
+    if player1_action == PlayerAction.Paper and player2_action == PlayerAction.Rock:
+        return Score(player1_action.value + Result.Win.value, player2_action.value)
     else:
-        return Score(player1_points.value, player2_points.value + Result.Win.value)
+        return Score(player1_action.value, player2_action.value + Result.Win.value)
 
 
 if __name__ == '__main__':
