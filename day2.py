@@ -1,3 +1,4 @@
+import types
 from aocd import get_data
 from dataclasses import dataclass, field
 from parse import parse
@@ -95,26 +96,26 @@ def play_round_part(player1_points: PlayerAction, player2_points: PlayerAction) 
     else:
         return Score(player1_points.value, player2_points.value + Result.Win.value)
 
+def play_game(rounds: list[Round], run_round_fn: types.FunctionType) -> Game:
+    round_scores = Game()
+    for current_round in rounds:
+        player1, player2 = run_round_fn(current_round)
+        completed_round = play_round_part(player1, player2)
+        round_scores.Player1.append(completed_round.Player1Points)
+        round_scores.Player2.append(completed_round.Player2Points)
+
+    return round_scores
 
 if __name__ == '__main__':
     data = ['A Y', 'B X', 'C Z']
     data = get_data(day=2, year=2022).splitlines()
 
-    round_scores_part1 = Game()
-    round_scores_part2 = Game()
-
+    parsed_rounds = []
     for input_line in data:
-        current_round = parse_round(input_line)
-        player1, player2 = player_action(current_round)
-        round_score_part1 = play_round_part(player1, player2)
-        round_scores_part1.Player1.append(round_score_part1.Player1Points)
-        round_scores_part1.Player2.append(round_score_part1.Player2Points)
+        parsed_rounds.append(parse_round(input_line))
 
-        player1, player2 = player_result(current_round)
-        round_score_part2 = play_round_part(player1, player2)
-        round_scores_part2.Player1.append(round_score_part2.Player1Points)
-        round_scores_part2.Player2.append(round_score_part2.Player2Points)
-        # print(current_round)
+    part1_game = play_game(parsed_rounds, player_action)
+    print(f'Part 1: {sum(part1_game.Player2)}')
 
-    print(f'Part 1: {sum(round_scores_part1.Player2)}')
-    print(f'Part 2: {sum(round_scores_part2.Player2)}')
+    part2_game = play_game(parsed_rounds, player_result)
+    print(f'Part 2: {sum(part2_game.Player2)}')
