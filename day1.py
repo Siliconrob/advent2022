@@ -26,4 +26,3 @@ if __name__ == '__main__':
 
     part2 = sum(calorie_sums[-3:])
     print(f'Part 2: {part2}')
-

@@ -16,6 +16,7 @@ class PlayerAction(Enum):
     Paper = 2
     Scissors = 3
 
+
 @dataclass
 class Score:
     Player1Points: int
@@ -40,34 +41,29 @@ def parse_round(input_line: str) -> Round:
 
 
 def player_action(input_round: Round) -> (PlayerAction, PlayerAction):
-    actions = { 'A': PlayerAction.Rock, 'X': PlayerAction.Rock, 'B': PlayerAction.Paper, 'Y': PlayerAction.Paper, 'C': PlayerAction.Scissors, 'Z': PlayerAction.Scissors }
+    actions = {'A': PlayerAction.Rock, 'X': PlayerAction.Rock, 'B': PlayerAction.Paper, 'Y': PlayerAction.Paper, 'C': PlayerAction.Scissors, 'Z': PlayerAction.Scissors}
     return actions[input_round.Player1Action], actions[input_round.Player2Action]
 
 
 def player_result(result_round: Round) -> (PlayerAction, PlayerAction):
-    player1_action = {'A': PlayerAction.Rock, 'B': PlayerAction.Paper, 'C': PlayerAction.Scissors }.get(result_round.Player1Action)
-    player2_result = { 'X': Result.Loss, 'Y': Result.Tie, 'Z': Result.Win }.get(result_round.Player2Action)
+    player1_action = {'A': PlayerAction.Rock, 'B': PlayerAction.Paper, 'C': PlayerAction.Scissors}.get(result_round.Player1Action)
+    player2_result = {'X': Result.Loss, 'Y': Result.Tie, 'Z': Result.Win}.get(result_round.Player2Action)
+    player2_action = {
+        Result.Tie: player1_action,
+        Result.Win: {
+            PlayerAction.Rock: PlayerAction.Paper,
+            PlayerAction.Paper: PlayerAction.Scissors,
+            PlayerAction.Scissors: PlayerAction.Rock
+        }.get(player1_action),
+        Result.Loss: {
+            PlayerAction.Rock: PlayerAction.Scissors,
+            PlayerAction.Paper: PlayerAction.Rock,
+            PlayerAction.Scissors: PlayerAction.Paper
+        }.get(player1_action)
+    }.get(player2_result)
 
-    match player2_result:
-        case Result.Tie:
-            player2_action = player1_action
-        case Result.Win:
-            match player1_action:
-                case PlayerAction.Rock:
-                    player2_action = PlayerAction.Paper
-                case PlayerAction.Paper:
-                    player2_action = PlayerAction.Scissors
-                case PlayerAction.Scissors:
-                    player2_action = PlayerAction.Rock
-        case Result.Loss:
-            match player1_action:
-                case PlayerAction.Rock:
-                    player2_action = PlayerAction.Scissors
-                case PlayerAction.Paper:
-                    player2_action = PlayerAction.Rock
-                case PlayerAction.Scissors:
-                    player2_action = PlayerAction.Paper
     return player1_action, player2_action
+
 
 def play_round_part(player1_action: PlayerAction, player2_action: PlayerAction) -> Score:
     if player1_action == player2_action:
@@ -81,6 +77,7 @@ def play_round_part(player1_action: PlayerAction, player2_action: PlayerAction) 
     else:
         return Score(player1_action.value, player2_action.value + Result.Win.value)
 
+
 def play_game(rounds: list[Round], run_round_fn: types.FunctionType) -> Game:
     round_scores = Game()
     for current_round in rounds:
@@ -89,6 +86,7 @@ def play_game(rounds: list[Round], run_round_fn: types.FunctionType) -> Game:
         round_scores.Player1.append(completed_round.Player1Points)
         round_scores.Player2.append(completed_round.Player2Points)
     return round_scores
+
 
 if __name__ == '__main__':
     data = ['A Y', 'B X', 'C Z']

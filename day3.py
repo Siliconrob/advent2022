@@ -21,11 +21,14 @@ def parse_round(input: str) -> (any, any):
     player1, player2 = parse('{} {}', input)
     return player1, player2
 
+
 def part1() -> any:
     return None
 
+
 def part2() -> any:
     return None
+
 
 if __name__ == '__main__':
     data = ['A Y', 'B X', 'C Z']
@@ -34,4 +37,4 @@ if __name__ == '__main__':
 
     print(f'Part 1: {part1()}')
 
-    print(f'Part 2: { part2()}')
+    print(f'Part 2: {part2()}')
