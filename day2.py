@@ -48,28 +48,26 @@ def player_result(result_round: Round) -> (PlayerAction, PlayerAction):
     player1_action = {'A': PlayerAction.Rock, 'B': PlayerAction.Paper, 'C': PlayerAction.Scissors }.get(result_round.Player1Action)
     player2_result = { 'X': Result.Loss, 'Y': Result.Tie, 'Z': Result.Win }.get(result_round.Player2Action)
 
-    if player2_result == Result.Tie:
-        player2_action = player1_action
-        return player1_action, player2_action
-    if player2_result == Result.Win:
-        match player1_action:
-            case PlayerAction.Rock:
-                player2_action = PlayerAction.Paper
-            case PlayerAction.Paper:
-                player2_action = PlayerAction.Scissors
-            case PlayerAction.Scissors:
-                player2_action = PlayerAction.Rock
-        return player1_action, player2_action
-    if player2_result == Result.Loss:
-        match player1_action:
-            case PlayerAction.Rock:
-                player2_action = PlayerAction.Scissors
-            case PlayerAction.Paper:
-                player2_action = PlayerAction.Rock
-            case PlayerAction.Scissors:
-                player2_action = PlayerAction.Paper
-        return player1_action, player2_action
-
+    match player2_result:
+        case Result.Tie:
+            player2_action = player1_action
+        case Result.Win:
+            match player1_action:
+                case PlayerAction.Rock:
+                    player2_action = PlayerAction.Paper
+                case PlayerAction.Paper:
+                    player2_action = PlayerAction.Scissors
+                case PlayerAction.Scissors:
+                    player2_action = PlayerAction.Rock
+        case Result.Loss:
+            match player1_action:
+                case PlayerAction.Rock:
+                    player2_action = PlayerAction.Scissors
+                case PlayerAction.Paper:
+                    player2_action = PlayerAction.Rock
+                case PlayerAction.Scissors:
+                    player2_action = PlayerAction.Paper
+    return player1_action, player2_action
 
 def play_round_part(player1_action: PlayerAction, player2_action: PlayerAction) -> Score:
     if player1_action == player2_action:
@@ -90,7 +88,6 @@ def play_game(rounds: list[Round], run_round_fn: types.FunctionType) -> Game:
         completed_round = play_round_part(player1, player2)
         round_scores.Player1.append(completed_round.Player1Points)
         round_scores.Player2.append(completed_round.Player2Points)
-
     return round_scores
 
 if __name__ == '__main__':
