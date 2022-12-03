@@ -30,13 +30,7 @@ def part1_priority(input_line: str) -> list[int]:
 
 # https://stackoverflow.com/questions/312443/how-do-i-split-a-list-into-equally-sized-chunks
 def part2_priorities(input_lines: list[str]) -> list[int]:
-    part2_priorities = []
-    baskets = list(mit.batched(input_lines, 3))
-    for basket in baskets:
-        common_elements = set(basket[0]) & set(basket[1]) & set(basket[2])
-        part2_priorities.append(alphabet.index(common_elements.pop()) + 1)
-    return part2_priorities
-
+    return [(alphabet.index((set(basket[0]) & set(basket[1]) & set(basket[2])).pop()) + 1) for basket in list(mit.batched(input_lines, 3))]
 
 if __name__ == '__main__':
     # data = ['vJrwpWtwJgWrhcsFMMfFFhFp',
