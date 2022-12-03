@@ -23,9 +23,7 @@ alphabet: list[str] = ''.join([chars, chars.upper()])
 
 def part1_priority(input_line: str) -> list[int]:
     chunks = list(chunk(input_line, 2))
-    common_elements = set(chunks[0]) & set(chunks[1])
-    priority = alphabet.index(common_elements.pop()) + 1
-    return priority
+    return alphabet.index((set(chunks[0]) & set(chunks[1])).pop()) + 1
 
 
 # https://stackoverflow.com/questions/312443/how-do-i-split-a-list-into-equally-sized-chunks
