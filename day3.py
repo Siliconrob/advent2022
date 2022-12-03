@@ -4,37 +4,40 @@ from dataclasses import dataclass, field
 from parse import parse
 from enum import Enum
 
+# https://stackoverflow.com/questions/22571259/split-a-string-into-n-equal-parts
+def chunk(in_string,num_chunks):
+    chunk_size = len(in_string)//num_chunks
+    if len(in_string) % num_chunks: chunk_size += 1
+    iterator = iter(in_string)
+    for _ in range(num_chunks):
+        accumulator = list()
+        for _ in range(chunk_size):
+            try: accumulator.append(next(iterator))
+            except StopIteration: break
+        yield ''.join(accumulator)
 
-class Result(Enum):
-    Win = 6
-    Loss = 0
-    Tie = 3
-
-
-@dataclass
-class Score:
-    Player1Points: int
-    Player2Points: int
-
-
-def parse_round(input: str) -> (any, any):
-    player1, player2 = parse('{} {}', input)
-    return player1, player2
-
-
-def part1() -> any:
-    return None
-
-
-def part2() -> any:
-    return None
+chars = 'abcdefghijklmnopqrstuvwxyz'
+alphabet = ''.join([chars, chars.upper()])
 
 
 if __name__ == '__main__':
-    data = ['A Y', 'B X', 'C Z']
-    # data = get_data(day=3, year=2022).splitlines()
-    parsed_rounds = [parse_round(input_line) for input_line in data]
+    # data = ['vJrwpWtwJgWrhcsFMMfFFhFp',
+    #         'jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL',
+    #         'PmmdzqPrVvPwwTWBwg',
+    #         'wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn',
+    #         'ttgJtRGJQctTZtZT',
+    #         'CrZsJsPPZsGzwwsLwLmpwMDw'
+    # ]
+    data = get_data(day=3, year=2022).splitlines()
+    priorities = []
+    for input_line in data:
+        chunks = list(chunk(input_line, 2))
+        first_half = set(chunks[0])
+        second_half = set(chunks[1])
+        common_elements = first_half & second_half
+        priority = alphabet.index(common_elements.pop()) + 1
+        priorities.append(priority)
 
-    print(f'Part 1: {part1()}')
+    print(f'Part 1: {sum(priorities)}')
 
-    print(f'Part 2: {part2()}')
+    # print(f'Part 2: {part2()}')
