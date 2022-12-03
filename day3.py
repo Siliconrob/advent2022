@@ -28,6 +28,7 @@ def part1_priority(input_line: str) -> list[int]:
     return priority
 
 
+# https://stackoverflow.com/questions/312443/how-do-i-split-a-list-into-equally-sized-chunks
 def part2_priorities(input_lines: list[str]) -> list[int]:
     part2_priorities = []
     baskets = list(mit.batched(input_lines, 3))
