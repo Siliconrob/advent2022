@@ -31,14 +31,14 @@ def part2_priorities(input_lines: list[str]) -> list[int]:
     return [(alphabet.index((set(basket[0]) & set(basket[1]) & set(basket[2])).pop()) + 1) for basket in list(mit.batched(input_lines, 3))]
 
 if __name__ == '__main__':
-    # data = ['vJrwpWtwJgWrhcsFMMfFFhFp',
-    #         'jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL',
-    #         'PmmdzqPrVvPwwTWBwg',
-    #         'wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn',
-    #         'ttgJtRGJQctTZtZT',
-    #         'CrZsJsPPZsGzwwsLwLmpwMDw'
-    # ]
-    data = get_data(day=3, year=2022).splitlines()
+    data = ['vJrwpWtwJgWrhcsFMMfFFhFp',
+            'jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL',
+            'PmmdzqPrVvPwwTWBwg',
+            'wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn',
+            'ttgJtRGJQctTZtZT',
+            'CrZsJsPPZsGzwwsLwLmpwMDw'
+    ]
+    #data = get_data(day=4, year=2022).splitlines()
     part1_priorities = [part1_priority(input_line) for input_line in data]
     print(f'Part 1: {sum(part1_priorities)}')
 
