@@ -3,24 +3,10 @@ from aocd import get_data
 import more_itertools as mit
 
 
-# https://stackoverflow.com/questions/22571259/split-a-string-into-n-equal-parts
-def chunk(in_string, num_chunks):
-    chunk_size = len(in_string) // num_chunks
-    if len(in_string) % num_chunks: chunk_size += 1
-    iterator = iter(in_string)
-    for _ in range(num_chunks):
-        accumulator = list()
-        for _ in range(chunk_size):
-            try:
-                accumulator.append(next(iterator))
-            except StopIteration:
-                break
-        yield ''.join(accumulator)
-
-
 def part1_priority(alphabet: str, input_line: str) -> list[int]:
-    chunks = list(chunk(input_line, 2))
-    return alphabet.index((set(chunks[0]) & set(chunks[1])).pop()) + 1
+    chunk1, chunk2 = mit.divide(2, list(input_line))
+    common = set(''.join(list(chunk1))) & set(''.join(list(chunk2)))
+    return alphabet.index(common.pop()) + 1
 
 
 # https://stackoverflow.com/questions/312443/how-do-i-split-a-list-into-equally-sized-chunks
