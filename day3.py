@@ -17,8 +17,8 @@ def chunk(in_string, num_chunks):
         yield ''.join(accumulator)
 
 
-chars = 'abcdefghijklmnopqrstuvwxyz'
-alphabet = ''.join([chars, chars.upper()])
+chars: str = 'abcdefghijklmnopqrstuvwxyz'
+alphabet: list[str] = ''.join([chars, chars.upper()])
 
 
 def part1_priority(input_line: str) -> list[int]:
