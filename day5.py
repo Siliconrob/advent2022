@@ -17,13 +17,13 @@ def parse_line(elf_pair_input: str) -> ElfAssignments:
 
 
 if __name__ == '__main__':
-    data = get_data(day=4, year=2022).splitlines()
-    # data = ['2-4,6-8',
-    #         '2-3,4-5',
-    #         '5-7,7-9',
-    #         '2-8,3-7',
-    #         '6-6,4-6',
-    #         '2-6,4-8']
+    # data = get_data(day=5, year=2022).splitlines()
+    data = ['2-4,6-8',
+            '2-3,4-5',
+            '5-7,7-9',
+            '2-8,3-7',
+            '6-6,4-6',
+            '2-6,4-8']
 
     part1_matches = 0
     part2_matches = 0
