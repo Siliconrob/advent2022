@@ -66,7 +66,7 @@ if __name__ == '__main__':
         'move 1 from 1 to 2',
     ]
 
-    data = get_data(day=5, year=2022).splitlines()
+    #data = get_data(day=6, year=2022).splitlines()
 
     splitter_index = data.index('')
     initial_state = data[:splitter_index - 1]
