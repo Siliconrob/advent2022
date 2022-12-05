@@ -8,6 +8,12 @@ class ElfAssignments:
     Elf1: set
     Elf2: set
 
+    def common_elements(self) -> set:
+        return self.Elf1 & self.Elf2
+
+    def is_match(self, set_to_match: set) -> bool:
+        return self.common_elements() & set_to_match == set_to_match
+
 
 def parse_line(elf_pair_input: str) -> ElfAssignments:
     parse_result = parse('{:d}-{:d},{:d}-{:d}', elf_pair_input).fixed
@@ -29,8 +35,8 @@ if __name__ == '__main__':
     part2_matches = 0
     for input_line in data:
         assignment = parse_line(input_line)
-        matches = assignment.Elf1 & assignment.Elf2
-        if (matches & assignment.Elf1 == assignment.Elf1) or (matches & assignment.Elf2 == assignment.Elf2):
+        matches = assignment.common_elements()
+        if assignment.is_match(assignment.Elf1) or assignment.is_match(assignment.Elf2):
             part1_matches += 1
         elif len(matches) > 0:
             part2_matches += 1
