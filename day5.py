@@ -10,9 +10,9 @@ class ElfAssignments:
 
 
 def parse_line(elf_pair_input: str) -> ElfAssignments:
-    elf1_range_start, elf1_range_end, elf2_range_start, elf2_range_end = parse('{:d}-{:d},{:d}-{:d}', elf_pair_input)
-    elf1_assignment = set(list(range(elf1_range_start, elf1_range_end + 1)))
-    elf2_assignment = set(list(range(elf2_range_start, elf2_range_end + 1)))
+    parse_result = parse('{:d}-{:d},{:d}-{:d}', elf_pair_input).fixed
+    elf1_assignment = set(list(range(parse_result[0], parse_result[1] + 1)))
+    elf2_assignment = set(list(range(parse_result[2], parse_result[3] + 1)))
     return ElfAssignments(elf1_assignment, elf2_assignment)
 
 
