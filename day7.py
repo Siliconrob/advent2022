@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 
-def get_dir_size(path='.'):
+def get_dir_size(path: str = '.') -> int:
     total = 0
     with os.scandir(path) as it:
         for entry in it:
@@ -15,7 +15,7 @@ def get_dir_size(path='.'):
     return total
 
 
-def build_filesystem(start_path: str):
+def build_filesystem(start_path: str) -> None:
     command_start = "$"
     current_path = start_path
     current_prompt_index = 2
@@ -44,7 +44,6 @@ def build_filesystem(start_path: str):
 
 
 def part1(start_path: str) -> dict:
-    # global paths_under_limit, root, dirs, files, current_dir, current_path, dir_size
     limit = 100000
     paths_under_limit = {}
     for root, dirs, files in os.walk(start_path):
