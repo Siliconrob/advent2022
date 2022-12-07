@@ -78,7 +78,6 @@ if __name__ == '__main__':
         for current_dir in dirs:
             current_path = os.path.join(root, current_dir)
             dir_size = get_dir_size(current_path)
-
             # paths_under_limit.
             if dir_size < limit:
                 paths_under_limit[current_path] = dir_size
@@ -87,5 +86,25 @@ if __name__ == '__main__':
     part1 = sum([v for k, v in paths_under_limit.items()])
     print(f'Part 1: {part1}')
 
-    # part2_index = read_input_stream(14, data[0])
-    # print(f'Part 2: {part2_index}')
+    all_dir_sizes = {}
+    for root, dirs, files in os.walk(temp_dir_root.name):
+        for current_dir in dirs:
+            current_path = os.path.join(root, current_dir)
+            dir_size = get_dir_size(current_path)
+            all_dir_sizes[current_path] = dir_size
+
+    total_dirs_size = get_dir_size(temp_dir_root.name)
+    max_disk_size = 70000000
+    desired_free_space = 30000000
+    current_free_space = max_disk_size - total_dirs_size
+
+    dir_to_delete = []
+
+    for current_entry in sorted(all_dir_sizes.items(), key=lambda x: x[1]):
+        size_of_dir = current_entry[1]
+        if total_dirs_size + desired_free_space - size_of_dir <= max_disk_size:
+            dir_to_delete.append(size_of_dir)
+            print(current_entry)
+
+    dir_to_delete.sort()
+    print(f'Part 2: {dir_to_delete[0]}')
