@@ -100,7 +100,7 @@ if __name__ == '__main__':
         '5626152 d.ext',
         '7214296 k'
     ]
-    data = get_data(day=7, year=2022).splitlines()
+    # data = get_data(day=8, year=2022).splitlines()
 
     temp_dir_root = tempfile.TemporaryDirectory()
     build_filesystem(temp_dir_root.name)
