@@ -15,6 +15,65 @@ def get_dir_size(path='.'):
     return total
 
 
+def build_filesystem(start_path: str):
+    command_start = "$"
+    current_path = start_path
+    current_prompt_index = 2
+    # skip first 2 lines always cd / and ls
+    while current_prompt_index < len(data):
+        prompt_history = data[current_prompt_index]
+        current_prompt_index += 1
+        if prompt_history.startswith(command_start):
+            command_parts = prompt_history.split(" ")
+            if len(command_parts) == 3:  # cd command
+                target_dir = command_parts[2]
+                if target_dir == "..":
+                    current_path = Path(current_path).parent.absolute()
+                else:
+                    current_path = os.path.join(current_path, target_dir)
+            else:
+                continue
+        else:
+            entry = prompt_history.split(" ")
+            new_path = os.path.join(current_path, entry[1])
+            if entry[0] == "dir":
+                os.mkdir(new_path)
+            else:
+                with open(new_path, "wb") as out:
+                    out.truncate(int(entry[0]))
+
+
+def part1(start_path: str) -> dict:
+    # global paths_under_limit, root, dirs, files, current_dir, current_path, dir_size
+    limit = 100000
+    paths_under_limit = {}
+    for root, dirs, files in os.walk(start_path):
+        for current_dir in dirs:
+            current_path = os.path.join(root, current_dir)
+            dir_size = get_dir_size(current_path)
+            # paths_under_limit.
+            if dir_size < limit:
+                paths_under_limit[current_path] = dir_size
+    return paths_under_limit
+
+
+def part2(start_path: str) -> str | None:
+    all_dir_sizes = {}
+    for root, dirs, files in os.walk(start_path):
+        for current_dir in dirs:
+            current_path = os.path.join(root, current_dir)
+            dir_size = get_dir_size(current_path)
+            all_dir_sizes[current_path] = dir_size
+    total_dirs_size = get_dir_size(temp_dir_root.name)
+    max_disk_size = 70000000
+    desired_free_space = 30000000
+    for current_entry in sorted(all_dir_sizes.items(), key=lambda x: x[1]):
+        size_of_dir = current_entry[1]
+        if total_dirs_size + desired_free_space - size_of_dir <= max_disk_size:
+            return size_of_dir
+    return None
+
+
 if __name__ == '__main__':
     data = [
         '$ cd /',
@@ -43,68 +102,14 @@ if __name__ == '__main__':
     ]
     data = get_data(day=7, year=2022).splitlines()
 
-    command_start = "$"
     temp_dir_root = tempfile.TemporaryDirectory()
-    current_path = temp_dir_root.name
-    print(current_path)
-    current_prompt_index = 2
-    # skip first 2 lines always cd / and ls
-    while current_prompt_index < len(data):
-        prompt_history = data[current_prompt_index]
-        current_prompt_index += 1
-        if prompt_history.startswith(command_start):
-            command_parts = prompt_history.split(" ")
-            if len(command_parts) == 3:  # cd command
-                target_dir = command_parts[2]
-                if target_dir == "..":
-                    current_path = Path(current_path).parent.absolute()
-                else:
-                    current_path = os.path.join(current_path, target_dir)
-            else:
-                continue
-        else:
-            entry = prompt_history.split(" ")
-            new_path = os.path.join(current_path, entry[1])
-            if entry[0] == "dir":
-                os.mkdir(new_path)
-            else:
-                with open(new_path, "wb") as out:
-                    out.truncate(int(entry[0]))
+    build_filesystem(temp_dir_root.name)
 
-    limit = 100000
-    paths_under_limit = {}
+    part1_paths = part1(temp_dir_root.name)
+    part1_result = sum([v for k, v in part1_paths.items()])
+    print(f'Part 1: {part1_result}')
 
-    for root, dirs, files in os.walk(temp_dir_root.name):
-        for current_dir in dirs:
-            current_path = os.path.join(root, current_dir)
-            dir_size = get_dir_size(current_path)
-            # paths_under_limit.
-            if dir_size < limit:
-                paths_under_limit[current_path] = dir_size
+    part2_result = part2(temp_dir_root.name)
+    print(f'Part 1: {part2_result}')
 
-    print(paths_under_limit)
-    part1 = sum([v for k, v in paths_under_limit.items()])
-    print(f'Part 1: {part1}')
-
-    all_dir_sizes = {}
-    for root, dirs, files in os.walk(temp_dir_root.name):
-        for current_dir in dirs:
-            current_path = os.path.join(root, current_dir)
-            dir_size = get_dir_size(current_path)
-            all_dir_sizes[current_path] = dir_size
-
-    total_dirs_size = get_dir_size(temp_dir_root.name)
-    max_disk_size = 70000000
-    desired_free_space = 30000000
-    current_free_space = max_disk_size - total_dirs_size
-
-    dir_to_delete = []
-
-    for current_entry in sorted(all_dir_sizes.items(), key=lambda x: x[1]):
-        size_of_dir = current_entry[1]
-        if total_dirs_size + desired_free_space - size_of_dir <= max_disk_size:
-            dir_to_delete.append(size_of_dir)
-            print(current_entry)
-
-    dir_to_delete.sort()
-    print(f'Part 2: {dir_to_delete[0]}')
+    # dir_to_delete.sort()
