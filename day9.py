@@ -17,7 +17,7 @@ class ScenicScore:
     Bottom: int
     Data: Tree
 
-    def compute(self) -> int:
+    def compute(self):
         return self.Left * self.Right * self.Top * self.Bottom
 
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
         '33549',
         '35390'
     ]
-    data = get_data(day=8, year=2022).splitlines()
+    # data = get_data(day=9, year=2022).splitlines()
     rows = len(data[0])
     columns = len(data)
 
