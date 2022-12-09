@@ -135,6 +135,6 @@ if __name__ == '__main__':
         'U 20'
     ]
 
-    data = get_data(day=9, year=2022).splitlines()
+    # data = get_data(day=10, year=2022).splitlines()
     print(f'Part 1: {part1(data)}')
     print(f'Part 2: {part2(data)}')
