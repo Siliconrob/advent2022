@@ -103,13 +103,10 @@ def part2(input_moves: list[str]):
             if tail_index == 0:
                 tails[tail_index] = move_tail(head, tail)
             else:
-                previous = tails[tail_index - 1]
-                tails[tail_index] = move_tail(previous, tail)
-                if tail_index == 8:
+                tails[tail_index] = move_tail(tails[tail_index - 1], tail)
+                if tail_index == len(tails) - 1:
                     end_tail_visits.append(f'{tails[tail_index].X},{tails[tail_index].Y}')
     return len(set(end_tail_visits))
-
-    return 0
 
 
 if __name__ == '__main__':
