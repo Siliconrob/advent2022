@@ -83,42 +83,46 @@ def move_tail(head: Position, tail: Position) -> Position:
         if tail.Y > head.Y: # move south
             return Position(tail.X - 1, tail.Y - 1)
 
-if __name__ == '__main__':
-    data = [
-        'R 4',
-        'U 4',
-        'L 3',
-        'D 1',
-        'R 4',
-        'D 1',
-        'L 5',
-        'R 2'
-    ]
-    data = get_data(day=9, year=2022).splitlines()
 
-    head = Position(0,0)
-    tail = Position(0,0)
-
+def part1(input_moves: list[str]):
+    head = Position(0, 0)
+    tail = Position(0, 0)
     head_visits = [head]
     tail_visits = [f'{tail.X},{tail.Y}']
-
-
-    for move in expand_moves(data):
+    for move in expand_moves(input_moves):
         head = move_head(head, Move(move))
         head_visits.append(head)
         tail = move_tail(head, tail)
         tail_visits.append(f'{tail.X},{tail.Y}')
+    return len(set(tail_visits))
 
-    uniques = set(tail_visits)
-    print(f'Part 1: {len(uniques)}')
+def part2(input_moves: list[str]):
+    return 0
 
-    # rows = len(data[0])
-    # columns = len(data)
-    #
-    # exterior_trees = rows + (rows - 1) + (columns - 1) + (columns - 2)
-    # matrix = [list(row) for row in data]
-    # visible_trees = part1(matrix, 1, 1)
-    # print(f'Part 1: {visible_trees + exterior_trees}')
-    #
-    # max_tree_score = max([x.compute() for x in part2(matrix, 1, 1)])
-    # print(f'Part 2: {max_tree_score}')
+
+if __name__ == '__main__':
+    # data = [
+    #     'R 4',
+    #     'U 4',
+    #     'L 3',
+    #     'D 1',
+    #     'R 4',
+    #     'D 1',
+    #     'L 5',
+    #     'R 2'
+    # ]
+
+    data = [
+        'R 5',
+        'U 8',
+        'L 8',
+        'D 3',
+        'R 17',
+        'D 10',
+        'L 25',
+        'U 20'
+    ]
+
+    # data = get_data(day=9, year=2022).splitlines()
+    # print(f'Part 1: {part1(data)}')
+    print(f'Part 2: {part2(data)}')
