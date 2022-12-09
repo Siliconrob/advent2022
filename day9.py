@@ -90,6 +90,25 @@ def part1(input_moves: list[str]):
     return len(set(tail_visits))
 
 def part2(input_moves: list[str]):
+    head = Position(0, 0)
+    head_visits = [head]
+    tails = [Position(0, 0) for x in range(0, 9)]
+    end_tail_visits = [f'{tails[-1].X},{tails[-1].Y}']
+    for move in expand_moves(input_moves):
+        head = move_head(head, Move(move))
+        head_visits.append(head)
+        for tail_index, tail in enumerate(tails):
+            if tail_index == 0:
+                tails[tail_index] = move_tail(head, tail)
+            else:
+                previous = tails[tail_index-1]
+                tails[tail_index] = move_tail(previous, tail)
+                if tail_index == 8:
+                    end_tail_visits.append(f'{tails[tail_index].X},{tails[tail_index].Y}')
+    return len(set(end_tail_visits))
+
+
+
     return 0
 
 
