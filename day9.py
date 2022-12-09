@@ -1,110 +1,124 @@
 from dataclasses import dataclass
+from enum import Enum
+
 from aocd import get_data
+from parse import parse
 
+
+class Move(Enum):
+    Left: str = 'L'
+    Right: str = 'R'
+    Up: str = 'U'
+    Down: str = 'D'
 
 @dataclass
-class Tree:
-    Height: int
-    Row: int
-    Column: int
+class Position:
+    X: int
+    Y: int
 
 
-@dataclass
-class ScenicScore:
-    Left: int
-    Right: int
-    Top: int
-    Bottom: int
-    Data: Tree
-
-    def compute(self):
-        return self.Left * self.Right * self.Top * self.Bottom
-
-
-def filter_view(tree_height: int, comparison_trees: list[int]) -> int:
-    count = 0
-    for comparison_tree in comparison_trees:
-        if comparison_tree < tree_height:
-            count += 1
-        if comparison_tree >= tree_height:
-            count += 1
-            break
-    return count
+def move_head(start: Position, direction: Move) -> Position:
+    match direction:
+        case Move.Left:
+            start.X -= 1
+        case Move.Right:
+            start.X += 1
+        case Move.Up:
+            start.Y += 1
+        case Move.Down:
+            start.Y -= 1
+    return Position(start.X, start.Y)
 
 
-def part2(input_matrix: list, start_row_index: int, start_column_index: int) -> list[ScenicScore]:
-    scores = []
-    for current_row_index in range(start_row_index, rows - 1):
-        for current_column_index in range(start_column_index, columns - 1):
-            current_tree_height = int(input_matrix[current_row_index][current_column_index])
-            current_tree = Tree(current_tree_height, current_row_index, current_column_index)
-            new_score = ScenicScore(0, 0, 0, 0, current_tree)
-
-            current_row_look_left = list(map(int, input_matrix[current_row_index][:current_column_index]))
-            current_row_look_left.reverse()
-            new_score.Left = filter_view(current_tree_height, current_row_look_left)
-            new_score.Right = filter_view(current_tree_height,
-                                          list(map(int, input_matrix[current_row_index][current_column_index + 1:])))
-
-            current_column_look_up = [int(input_matrix[lookup_row_index_up][current_column_index]) for
-                                      lookup_row_index_up in range(0, current_row_index)]
-            current_column_look_up.reverse()
-            new_score.Top = filter_view(current_tree_height, current_column_look_up)
-
-            current_column_look_down = [int(input_matrix[lookup_row_index_down][current_column_index]) for
-                                        lookup_row_index_down in range(current_row_index + 1, len(input_matrix))]
-            new_score.Bottom = filter_view(current_tree_height, current_column_look_down)
-            scores.append(new_score)
-    return scores
+def expand_moves(input_data: list[str]):
+    all_moves = []
+    for moves in input_data:
+        compact_move = parse('{} {:d}', moves).fixed
+        all_moves.extend([compact_move[0] for index in range(0, compact_move[1])])
+    return all_moves
 
 
-def is_tree_visible(tree_height: int, comparison_trees: list[int]) -> bool:
-    return all(z < tree_height for z in comparison_trees)
+def move_tail(head: Position, tail: Position) -> Position:
+    # print(head)
+    if tail.X == head.X and tail.Y == head.Y:
+        return Position(tail.X, tail.Y)
+
+    if tail.X + 1 == head.X or tail.X - 1 == head.X:
+        if tail.Y == head.Y or tail.Y + 1 == head.Y or tail.Y - 1 == head.Y:
+            return Position(tail.X, tail.Y)
+
+    if tail.Y + 1 == head.Y or tail.Y - 1 == head.Y:
+        if tail.X == head.X or tail.X + 1 == head.X or tail.X - 1 == head.X:
+            return Position(tail.X, tail.Y)
+
+    if tail.X == head.X:
+        if tail.Y < head.Y and head.Y - tail.Y == 2:
+            return Position(tail.X, tail.Y + 1)
+        if tail.Y > head.Y and tail.Y - head.Y == 2:
+            return Position(tail.X, tail.Y - 1)
+    if tail.Y == head.Y:
+        if tail.X < head.X and head.X - tail.X == 2:
+            return Position(tail.X + 1, tail.Y)
+        if tail.X > head.X and tail.X - head.X == 2:
+            return Position(tail.X - 1, tail.Y)
+
+    if tail.X + 1 == head.X and tail.Y + 1 == head.Y: # NorthEast diagonal
+        return Position(tail.X, tail.Y)
+    if tail.X + 1 == head.X and tail.Y - 1 == head.Y:  # SouthEast diagonal
+        return Position(tail.X, tail.Y)
+    if tail.X - 1 == head.X and tail.Y + 1 == head.Y: # NorthWest diagonal
+        return Position(tail.X, tail.Y)
+    if tail.X - 1 == head.X and tail.Y - 1 == head.Y:  # SouthWest diagonal
+        return Position(tail.X, tail.Y)
 
 
-def part1(input_matrix: list, start_row_index: int, start_column_index: int) -> int:
-    visible_trees = 0
-    for current_row_index in range(start_row_index, rows - 1):
-        for current_column_index in range(start_column_index, columns - 1):
-            current_tree_height = int(input_matrix[current_row_index][current_column_index])
-            current_row_look_left = list(map(int, input_matrix[current_row_index][:current_column_index]))
-            if is_tree_visible(current_tree_height, current_row_look_left):
-                visible_trees += 1
-                continue
-            current_row_look_right = list(map(int, input_matrix[current_row_index][current_column_index + 1:]))
-            if is_tree_visible(current_tree_height, current_row_look_right):
-                visible_trees += 1
-                continue
-            current_column_look_up = [int(input_matrix[lookup_row_index_up][current_column_index]) for
-                                      lookup_row_index_up in range(0, current_row_index)]
-            if is_tree_visible(current_tree_height, current_column_look_up):
-                visible_trees += 1
-                continue
-            current_column_look_down = [int(input_matrix[lookup_row_index_down][current_column_index]) for
-                                        lookup_row_index_down in range(current_row_index + 1, len(input_matrix))]
-            if is_tree_visible(current_tree_height, current_column_look_down):
-                visible_trees += 1
-                continue
-
-    return visible_trees
-
+    if tail.X < head.X: # move east
+        if tail.Y < head.Y: # move north
+            return Position(tail.X + 1, tail.Y + 1)
+        if tail.Y > head.Y: # move south
+            return Position(tail.X + 1, tail.Y - 1)
+    if tail.X > head.X: # move west
+        if tail.Y < head.Y: # move north
+            return Position(tail.X - 1, tail.Y + 1)
+        if tail.Y > head.Y: # move south
+            return Position(tail.X - 1, tail.Y - 1)
 
 if __name__ == '__main__':
     data = [
-        '30373',
-        '25512',
-        '65332',
-        '33549',
-        '35390'
+        'R 4',
+        'U 4',
+        'L 3',
+        'D 1',
+        'R 4',
+        'D 1',
+        'L 5',
+        'R 2'
     ]
-    # data = get_data(day=9, year=2022).splitlines()
-    rows = len(data[0])
-    columns = len(data)
+    data = get_data(day=9, year=2022).splitlines()
 
-    exterior_trees = rows + (rows - 1) + (columns - 1) + (columns - 2)
-    matrix = [list(row) for row in data]
-    visible_trees = part1(matrix, 1, 1)
-    print(f'Part 1: {visible_trees + exterior_trees}')
+    head = Position(0,0)
+    tail = Position(0,0)
 
-    max_tree_score = max([x.compute() for x in part2(matrix, 1, 1)])
-    print(f'Part 2: {max_tree_score}')
+    head_visits = [head]
+    tail_visits = [f'{tail.X},{tail.Y}']
+
+
+    for move in expand_moves(data):
+        head = move_head(head, Move(move))
+        head_visits.append(head)
+        tail = move_tail(head, tail)
+        tail_visits.append(f'{tail.X},{tail.Y}')
+
+    uniques = set(tail_visits)
+    print(f'Part 1: {len(uniques)}')
+
+    # rows = len(data[0])
+    # columns = len(data)
+    #
+    # exterior_trees = rows + (rows - 1) + (columns - 1) + (columns - 2)
+    # matrix = [list(row) for row in data]
+    # visible_trees = part1(matrix, 1, 1)
+    # print(f'Part 1: {visible_trees + exterior_trees}')
+    #
+    # max_tree_score = max([x.compute() for x in part2(matrix, 1, 1)])
+    # print(f'Part 2: {max_tree_score}')
