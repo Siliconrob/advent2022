@@ -52,25 +52,18 @@ def move_tail(head: Position, tail: Position) -> Position:
             return Position(tail.X, tail.Y)
 
     if tail.X == head.X:
-        if tail.Y < head.Y and head.Y - tail.Y == 2:
+        if tail.Y < head.Y and head.Y - tail.Y == 2: # up
             return Position(tail.X, tail.Y + 1)
-        if tail.Y > head.Y and tail.Y - head.Y == 2:
+        if tail.Y > head.Y and tail.Y - head.Y == 2: # down
             return Position(tail.X, tail.Y - 1)
     if tail.Y == head.Y:
-        if tail.X < head.X and head.X - tail.X == 2:
+        if tail.X < head.X and head.X - tail.X == 2: # right
             return Position(tail.X + 1, tail.Y)
-        if tail.X > head.X and tail.X - head.X == 2:
+        if tail.X > head.X and tail.X - head.X == 2: # left
             return Position(tail.X - 1, tail.Y)
 
-    if tail.X + 1 == head.X and tail.Y + 1 == head.Y: # NorthEast diagonal
+    if (tail.X + 1 == head.X or tail.X - 1 == head.X) and (tail.Y + 1 == head.Y or tail.Y - 1 == head.Y):
         return Position(tail.X, tail.Y)
-    if tail.X + 1 == head.X and tail.Y - 1 == head.Y:  # SouthEast diagonal
-        return Position(tail.X, tail.Y)
-    if tail.X - 1 == head.X and tail.Y + 1 == head.Y: # NorthWest diagonal
-        return Position(tail.X, tail.Y)
-    if tail.X - 1 == head.X and tail.Y - 1 == head.Y:  # SouthWest diagonal
-        return Position(tail.X, tail.Y)
-
 
     if tail.X < head.X: # move east
         if tail.Y < head.Y: # move north
@@ -123,6 +116,6 @@ if __name__ == '__main__':
         'U 20'
     ]
 
-    # data = get_data(day=9, year=2022).splitlines()
-    # print(f'Part 1: {part1(data)}')
+    data = get_data(day=9, year=2022).splitlines()
+    print(f'Part 1: {part1(data)}')
     print(f'Part 2: {part2(data)}')
