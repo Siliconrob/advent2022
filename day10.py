@@ -1,60 +1,64 @@
 from dataclasses import dataclass
-from enum import Enum
-
 from aocd import get_data
 from parse import parse
+
 
 @dataclass
 class Cycle:
     Count: int
     Register: int
     Instruction: str
+
     def signal_strength(self) -> int:
         return self.Count * self.Register
 
-def part2(instructions: list[str]) -> list[str]:
 
+def part2(instructions: list[str]) -> list[str]:
     current_run = []
     cycle = 0
     current_value = 1
-
-    screen_draw = []
-    sprite_position = 1
-
+    screen_draw = ''
     for instruction in instructions:
         # print(instruction)
         cycle += 1
         if instruction == "noop":
             current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
             current_run.append(current_cycle)
-            screen_draw.append(pixel_type(current_cycle, sprite_position))
-            sprite_position = current_cycle.Register
+            new_pixel = pixel_type(current_cycle, cycle - 1)
+            cycle = 0 if '\n' in new_pixel else cycle
+            screen_draw += new_pixel
             continue
         else:
             parsed_instruction = parse('{} {}', instruction).fixed
             current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
             current_run.append(current_cycle)
-            screen_draw.append(pixel_type(current_cycle, sprite_position))
-            sprite_position = current_cycle.Register
+            new_pixel = pixel_type(current_cycle, cycle - 1)
+            cycle = 0 if '\n' in new_pixel else cycle
+            screen_draw += new_pixel
             cycle += 1
             current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_value += int(parsed_instruction[1])
             current_run.append(current_cycle)
-            screen_draw.append(pixel_type(current_cycle, sprite_position))
-            sprite_position = current_cycle.Register
+            new_pixel = pixel_type(current_cycle, cycle - 1)
+            cycle = 0 if '\n' in new_pixel else cycle
+            screen_draw += new_pixel
+            current_value += int(parsed_instruction[1])
 
     return screen_draw
 
 
 def pixel_type(current_cycle, sprite_position):
+    print_char = ''
+    q, r = divmod(current_cycle.Count, 40)
+
+    if r == 0:
+        print_char = '\n'
     if current_cycle.Register in [sprite_position - 1, sprite_position, sprite_position + 1]:
-        return '#'
+        return f'#{print_char}'
     else:
-        return '.'
+        return f'.{print_char}'
 
 
 def part1(instructions: list[str]) -> int:
-
     current_run = []
     cycle = 0
     current_value = 1
@@ -242,4 +246,4 @@ if __name__ == '__main__':
     data = get_data(day=10, year=2022).splitlines()
 
     print(f'Part 1: {part1(data)}')
-    #print(f'Part 2: {part2(data)}')
+    print(f'Part 2: \n\n{part2(data)}')
