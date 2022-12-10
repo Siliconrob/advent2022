@@ -12,15 +12,54 @@ class Cycle:
     def signal_strength(self) -> int:
         return self.Count * self.Register
 
-def part1(instructions: list[str]) -> list[Cycle]:
+def part2(instructions: list[str]) -> list[str]:
 
     current_run = []
+    cycle = 0
+    current_value = 1
 
+    screen_draw = []
+    sprite_position = 1
+
+    for instruction in instructions:
+        # print(instruction)
+        cycle += 1
+        if instruction == "noop":
+            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
+            current_run.append(current_cycle)
+            screen_draw.append(pixel_type(current_cycle, sprite_position))
+            sprite_position = current_cycle.Register
+            continue
+        else:
+            parsed_instruction = parse('{} {}', instruction).fixed
+            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
+            current_run.append(current_cycle)
+            screen_draw.append(pixel_type(current_cycle, sprite_position))
+            sprite_position = current_cycle.Register
+            cycle += 1
+            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
+            current_value += int(parsed_instruction[1])
+            current_run.append(current_cycle)
+            screen_draw.append(pixel_type(current_cycle, sprite_position))
+            sprite_position = current_cycle.Register
+
+    return screen_draw
+
+
+def pixel_type(current_cycle, sprite_position):
+    if current_cycle.Register in [sprite_position - 1, sprite_position, sprite_position + 1]:
+        return '#'
+    else:
+        return '.'
+
+
+def part1(instructions: list[str]) -> int:
+
+    current_run = []
     cycle = 0
     current_value = 1
 
     for instruction in instructions:
-        # print(instruction)
         cycle += 1
         if instruction == "noop":
             current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
@@ -35,11 +74,9 @@ def part1(instructions: list[str]) -> list[Cycle]:
             current_value += int(parsed_instruction[1])
             current_run.append(current_cycle)
 
-    return current_run
+    key_cycles = [current_run[key_index] for key_index in range(19, 221, 40)]
+    return sum([key_cycle.signal_strength() for key_cycle in key_cycles])
 
-
-def part2(input_moves: list[str]):
-    pass
 
 if __name__ == '__main__':
     # data = [
@@ -204,25 +241,5 @@ if __name__ == '__main__':
 
     data = get_data(day=10, year=2022).splitlines()
 
-    start_index = 19
-    increment = 40
-    part1_run = part1(data)
-
-    key_cycles = [
-        part1_run[start_index],
-        part1_run[start_index + increment],
-        part1_run[start_index + increment * 2],
-        part1_run[start_index + increment * 3],
-        part1_run[start_index + increment * 4],
-        part1_run[start_index + increment * 5]
-    ]
-
-    for key_cycle in key_cycles:
-        print(f'[{key_cycle.Count}]({key_cycle.Instruction}, {key_cycle.Register}): {key_cycle.signal_strength()}')
-
-    part1_answer = sum([key_cycle.signal_strength() for key_cycle in key_cycles])
-
-    print(f'Part 1: {part1_answer}')
-
-    # print(f'Part 1: {part1(data)}')
-    # print(f'Part 2: {part2(data)}')
+    print(f'Part 1: {part1(data)}')
+    #print(f'Part 2: {part2(data)}')
