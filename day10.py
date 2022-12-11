@@ -13,7 +13,7 @@ class Cycle:
         return self.Count * self.Register
 
 
-def part2(instructions: list[str]) -> list[str]:
+def part2(instructions: list[str]) -> str:
     current_run = []
     cycle = 0
     current_value = 1
@@ -22,31 +22,27 @@ def part2(instructions: list[str]) -> list[str]:
         # print(instruction)
         cycle += 1
         if instruction == "noop":
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            new_pixel = pixel_type(current_cycle, cycle - 1)
-            cycle = 0 if '\n' in new_pixel else cycle
-            screen_draw += new_pixel
-            continue
+            cycle, screen_draw = run_cycle(current_run, current_value, cycle, instruction, screen_draw)
         else:
             parsed_instruction = parse('{} {}', instruction).fixed
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            new_pixel = pixel_type(current_cycle, cycle - 1)
-            cycle = 0 if '\n' in new_pixel else cycle
-            screen_draw += new_pixel
+            cycle, screen_draw = run_cycle(current_run, current_value, cycle, instruction, screen_draw)
             cycle += 1
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            new_pixel = pixel_type(current_cycle, cycle - 1)
-            cycle = 0 if '\n' in new_pixel else cycle
-            screen_draw += new_pixel
+            cycle, screen_draw = run_cycle(current_run, current_value, cycle, instruction, screen_draw)
             current_value += int(parsed_instruction[1])
 
     return screen_draw
 
 
-def pixel_type(current_cycle, sprite_position):
+def run_cycle(current_run: list[Cycle], current_value: int, cycle: int, instruction: str, screen_draw: str) -> (int, str):
+    current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
+    current_run.append(current_cycle)
+    new_pixel = pixel_type(current_cycle, cycle - 1)
+    cycle = 0 if '\n' in new_pixel else cycle
+    screen_draw += new_pixel
+    return cycle, screen_draw
+
+
+def pixel_type(current_cycle: Cycle, sprite_position: int) -> str:
     print_char = ''
     q, r = divmod(current_cycle.Count, 40)
 
@@ -66,17 +62,13 @@ def part1(instructions: list[str]) -> int:
     for instruction in instructions:
         cycle += 1
         if instruction == "noop":
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            continue
+            current_run.append(Cycle(Count=cycle, Register=current_value, Instruction=instruction))
         else:
             parsed_instruction = parse('{} {}', instruction).fixed
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
+            current_run.append(Cycle(Count=cycle, Register=current_value, Instruction=instruction))
             cycle += 1
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
+            current_run.append(Cycle(Count=cycle, Register=current_value, Instruction=instruction))
             current_value += int(parsed_instruction[1])
-            current_run.append(current_cycle)
 
     key_cycles = [current_run[key_index] for key_index in range(19, 221, 40)]
     return sum([key_cycle.signal_strength() for key_cycle in key_cycles])
