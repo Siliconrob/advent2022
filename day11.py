@@ -1,3 +1,4 @@
+import typing
 from collections import deque
 from dataclasses import dataclass
 from aocd import get_data
@@ -10,7 +11,7 @@ class Monkey:
     CurrentItems: deque[int] = deque[int]
     ItemsInspected: int = 0
 
-    def inspect(self, worry_func, monkeys):
+    def inspect(self, worry_func: typing.Callable[[int], int], monkeys: dict):
         while len(self.CurrentItems) > 0:
             current_item = self.CurrentItems.popleft()
             parsed = parse('{} = {} {} {}', self.Raw[2].split(':').pop()).fixed
@@ -43,25 +44,13 @@ class Monkey:
         parsed = parse('{} {:d}:', self.Raw[0]).fixed
         return parsed[1]
 
-    def run_operation(self):
-        pass
 
-
-def parse_monkey_inputs(data) -> dict:
+def parse_monkey_inputs(data: list[str]) -> dict:
     monkeys = {}
-    monkey_input_lines = []
-    for input_line in data:
-        if input_line == '':
-            current_monkey = Monkey(monkey_input_lines)
-            current_monkey.CurrentItems = deque(current_monkey.starting_items())
-            monkeys[current_monkey.id()] = current_monkey
-            monkey_input_lines = []
-        else:
-            monkey_input_lines.append(input_line)
-    current_monkey = Monkey(monkey_input_lines)
-    current_monkey.CurrentItems = deque(current_monkey.starting_items())
-    monkeys[current_monkey.id()] = current_monkey
-
+    for monkey_group in data:
+        current_monkey = Monkey(monkey_group.splitlines())
+        current_monkey.CurrentItems = deque(current_monkey.starting_items())
+        monkeys[current_monkey.id()] = current_monkey
     return monkeys
 
 
@@ -102,8 +91,7 @@ if __name__ == '__main__':
         '    If true: throw to monkey 0',
         '    If false: throw to monkey 1'
     ]
-    data = get_data(day=11, year=2022).splitlines()
-
+    data = get_data(day=11, year=2022).split('\n\n')
     monkeys = parse_monkey_inputs(data)
 
     for round in range(0, 20):
