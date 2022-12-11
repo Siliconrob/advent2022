@@ -95,18 +95,31 @@ if __name__ == '__main__':
     '    If true: throw to monkey 0',
     '    If false: throw to monkey 1'
     ]
-    data = get_data(day=11, year=2022).splitlines()
+    # data = get_data(day=11, year=2022).splitlines()
 
     monkeys = parse_monkey_inputs(data)
-    worry_func = lambda x: x // 3
 
-    for round in range(0, 20):
+    # for round in range(0, 20):
+    #     for current_monkey in monkeys.values():
+    #         current_monkey.inspect(lambda x: x // 3, monkeys)
+    #
+    # part1_answer = 1
+    # for top_monkeys in sorted(monkeys, key=lambda x: (monkeys[x].ItemsInspected), reverse=True)[:2]:
+    #     part1_answer *= monkeys[top_monkeys].ItemsInspected
+    #
+    # print(f'Part 1: {part1_answer}')
+
+    worry_func = lambda x: x
+    for round in range(0, 10000):
+        q, r = divmod(round, 100)
+        if r == 0:
+            print(f'Current round {round}')
+
         for current_monkey in monkeys.values():
-            current_monkey.inspect(worry_func, monkeys)
+            current_monkey.inspect(lambda x: x, monkeys)
 
-    part1_answer = 1
+    part2_answer = 1
     for top_monkeys in sorted(monkeys, key=lambda x: (monkeys[x].ItemsInspected), reverse=True)[:2]:
-        part1_answer *= monkeys[top_monkeys].ItemsInspected
+        part2_answer *= monkeys[top_monkeys].ItemsInspected
 
-    print(f'Part 1: {part1_answer}')
-    #print(f'Part 2: \n\n{part2(data)}')
+    print(f'Part 2: {part2_answer}')
