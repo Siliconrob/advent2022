@@ -1,249 +1,112 @@
+from collections import deque
 from dataclasses import dataclass
 from aocd import get_data
 from parse import parse
 
 
 @dataclass
-class Cycle:
-    Count: int
-    Register: int
-    Instruction: str
-
-    def signal_strength(self) -> int:
-        return self.Count * self.Register
+class Monkey:
+    Raw: list[str]
+    CurrentItems: deque[int] = deque[int]
+    ItemsInspected: int = 0
 
 
-def part2(instructions: list[str]) -> list[str]:
-    current_run = []
-    cycle = 0
-    current_value = 1
-    screen_draw = ''
-    for instruction in instructions:
-        # print(instruction)
-        cycle += 1
-        if instruction == "noop":
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            new_pixel = pixel_type(current_cycle, cycle - 1)
-            cycle = 0 if '\n' in new_pixel else cycle
-            screen_draw += new_pixel
-            continue
+    def inspect(self, worry_func, monkeys):
+        while len(self.CurrentItems) > 0:
+            current_item = self.CurrentItems.popleft()
+            parsed = parse('{} = {} {} {}',self.Raw[2].split(':').pop()).fixed
+            operation_func = lambda x,y: x * y
+            if parsed[2] == "+":
+                operation_func = lambda x,y: x + y
+            last_arg = current_item
+            if parsed[3] != "old":
+                last_arg = int(parsed[3])
+            new_worry_level = operation_func(current_item, last_arg)
+            self.ItemsInspected += 1
+            bored_value = worry_func(new_worry_level)
+            q, r = divmod(bored_value, self.test())
+            new_monkey_index = self.if_true() if r == 0 else self.if_false()
+            monkeys[new_monkey_index].CurrentItems.append(bored_value)
+
+    def if_true(self):
+        return int(self.Raw[4].split(':')[1].split(' ').pop())
+
+    def if_false(self):
+        return int(self.Raw[5].split(':')[1].split(' ').pop())
+
+    def test(self):
+        return int(self.Raw[3].split(':')[1].split(' ').pop())
+
+    def starting_items(self):
+        return [int(item) for item in self.Raw[1].split(':')[1].split(',')]
+
+    def id(self):
+        parsed = parse('{} {:d}:', self.Raw[0]).fixed
+        return parsed[1]
+
+    def run_operation(self):
+        pass
+
+def parse_monkey_inputs(data) -> dict:
+    monkeys = {}
+    monkey_input_lines = []
+    for input_line in data:
+        if input_line == '':
+            current_monkey = Monkey(monkey_input_lines)
+            current_monkey.CurrentItems = deque(current_monkey.starting_items())
+            monkeys[current_monkey.id()] = current_monkey
+            monkey_input_lines = []
         else:
-            parsed_instruction = parse('{} {}', instruction).fixed
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            new_pixel = pixel_type(current_cycle, cycle - 1)
-            cycle = 0 if '\n' in new_pixel else cycle
-            screen_draw += new_pixel
-            cycle += 1
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            new_pixel = pixel_type(current_cycle, cycle - 1)
-            cycle = 0 if '\n' in new_pixel else cycle
-            screen_draw += new_pixel
-            current_value += int(parsed_instruction[1])
+            monkey_input_lines.append(input_line)
+    current_monkey = Monkey(monkey_input_lines)
+    current_monkey.CurrentItems = deque(current_monkey.starting_items())
+    monkeys[current_monkey.id()] = current_monkey
 
-    return screen_draw
-
-
-def pixel_type(current_cycle, sprite_position):
-    print_char = ''
-    q, r = divmod(current_cycle.Count, 40)
-
-    if r == 0:
-        print_char = '\n'
-    if current_cycle.Register in [sprite_position - 1, sprite_position, sprite_position + 1]:
-        return f'#{print_char}'
-    else:
-        return f'.{print_char}'
-
-
-def part1(instructions: list[str]) -> int:
-    current_run = []
-    cycle = 0
-    current_value = 1
-
-    for instruction in instructions:
-        cycle += 1
-        if instruction == "noop":
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            continue
-        else:
-            parsed_instruction = parse('{} {}', instruction).fixed
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_run.append(current_cycle)
-            cycle += 1
-            current_cycle = Cycle(Count=cycle, Register=current_value, Instruction=instruction)
-            current_value += int(parsed_instruction[1])
-            current_run.append(current_cycle)
-
-    key_cycles = [current_run[key_index] for key_index in range(19, 221, 40)]
-    return sum([key_cycle.signal_strength() for key_cycle in key_cycles])
+    return monkeys
 
 
 if __name__ == '__main__':
-    # data = [
-    #     'R 4',
-    #     'U 4',
-    #     'L 3',
-    #     'D 1',
-    #     'R 4',
-    #     'D 1',
-    #     'L 5',
-    #     'R 2'
-    # ]
-
     data = [
-        'addx 15',
-        'addx -11',
-        'addx 6',
-        'addx -3',
-        'addx 5',
-        'addx -1',
-        'addx -8',
-        'addx 13',
-        'addx 4',
-        'noop',
-        'addx -1',
-        'addx 5',
-        'addx -1',
-        'addx 5',
-        'addx -1',
-        'addx 5',
-        'addx -1',
-        'addx 5',
-        'addx -1',
-        'addx -35',
-        'addx 1',
-        'addx 24',
-        'addx -19',
-        'addx 1',
-        'addx 16',
-        'addx -11',
-        'noop',
-        'noop',
-        'addx 21',
-        'addx -15',
-        'noop',
-        'noop',
-        'addx -3',
-        'addx 9',
-        'addx 1',
-        'addx -3',
-        'addx 8',
-        'addx 1',
-        'addx 5',
-        'noop',
-        'noop',
-        'noop',
-        'noop',
-        'noop',
-        'addx -36',
-        'noop',
-        'addx 1',
-        'addx 7',
-        'noop',
-        'noop',
-        'noop',
-        'addx 2',
-        'addx 6',
-        'noop',
-        'noop',
-        'noop',
-        'noop',
-        'noop',
-        'addx 1',
-        'noop',
-        'noop',
-        'addx 7',
-        'addx 1',
-        'noop',
-        'addx -13',
-        'addx 13',
-        'addx 7',
-        'noop',
-        'addx 1',
-        'addx -33',
-        'noop',
-        'noop',
-        'noop',
-        'addx 2',
-        'noop',
-        'noop',
-        'noop',
-        'addx 8',
-        'noop',
-        'addx -1',
-        'addx 2',
-        'addx 1',
-        'noop',
-        'addx 17',
-        'addx -9',
-        'addx 1',
-        'addx 1',
-        'addx -3',
-        'addx 11',
-        'noop',
-        'noop',
-        'addx 1',
-        'noop',
-        'addx 1',
-        'noop',
-        'noop',
-        'addx -13',
-        'addx -19',
-        'addx 1',
-        'addx 3',
-        'addx 26',
-        'addx -30',
-        'addx 12',
-        'addx -1',
-        'addx 3',
-        'addx 1',
-        'noop',
-        'noop',
-        'noop',
-        'addx -9',
-        'addx 18',
-        'addx 1',
-        'addx 2',
-        'noop',
-        'noop',
-        'addx 9',
-        'noop',
-        'noop',
-        'noop',
-        'addx -1',
-        'addx 2',
-        'addx -37',
-        'addx 1',
-        'addx 3',
-        'noop',
-        'addx 15',
-        'addx -21',
-        'addx 22',
-        'addx -6',
-        'addx 1',
-        'noop',
-        'addx 2',
-        'addx 1',
-        'noop',
-        'addx -10',
-        'noop',
-        'noop',
-        'addx 20',
-        'addx 1',
-        'addx 2',
-        'addx 2',
-        'addx -6',
-        'addx -11',
-        'noop',
-        'noop',
-        'noop'
+    'Monkey 0:',
+    '  Starting items: 79, 98',
+    '  Operation: new = old * 19',
+    '  Test: divisible by 23',
+    '    If true: throw to monkey 2',
+    '    If false: throw to monkey 3',
+    '',
+    'Monkey 1:',
+    '  Starting ,items: 54, 65, 75, 74',
+    '  Operation: new = old + 6',
+    '  Test: divisible by 19',
+    '    If true: throw to monkey 2',
+    '    If false: throw to monkey 0',
+    '',
+    'Monkey 2:',
+    '  Starting ,items: 79, 60, 97',
+    '  Operation: new = old * old',
+    '  Test: divisible by 13',
+    '    If true: throw to monkey 1',
+    '    If false: throw to monkey 3',
+    '',
+    'Monkey 3:',
+    '  Starting items: 74',
+    '  Operation: new = old + 3',
+    '  Test: divisible by 17',
+    '    If true: throw to monkey 0',
+    '    If false: throw to monkey 1'
     ]
+    data = get_data(day=11, year=2022).splitlines()
 
-    # data = get_data(day=11, year=2022).splitlines()
+    monkeys = parse_monkey_inputs(data)
+    worry_func = lambda x: x // 3
 
-    print(f'Part 1: {part1(data)}')
-    print(f'Part 2: \n\n{part2(data)}')
+    for round in range(0, 20):
+        for current_monkey in monkeys.values():
+            current_monkey.inspect(worry_func, monkeys)
+
+    part1_answer = 1
+    for top_monkeys in sorted(monkeys, key=lambda x: (monkeys[x].ItemsInspected), reverse=True)[:2]:
+        part1_answer *= monkeys[top_monkeys].ItemsInspected
+
+    print(f'Part 1: {part1_answer}')
+    #print(f'Part 2: \n\n{part2(data)}')
