@@ -56,7 +56,7 @@ def parse_monkey_inputs(data: list[str]) -> dict:
 
 def monkey_business_factor(input_monkeys):
     answer = 1
-    for top_monkeys in sorted(input_monkeys, key=lambda x: (input_monkeys[x].ItemsInspected), reverse=True)[:2]:
+    for top_monkeys in sorted(input_monkeys, key=lambda x: input_monkeys[x].ItemsInspected, reverse=True)[:2]:
         answer *= input_monkeys[top_monkeys].ItemsInspected
     return answer
 
