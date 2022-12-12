@@ -96,7 +96,7 @@ if __name__ == '__main__':
         distance = find_path(grid, start_point, end)
         if distance > 300: # something is wrong with the path finding that it gives short paths
             path_lengths.append(distance)
-    print(f'Part 2: {sorted(path_lengths)[0]}')
+    print(f'Part 2: {sorted(path_lengths, reverse=True).pop()}')
 
 
 
