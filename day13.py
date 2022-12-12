@@ -86,7 +86,7 @@ if __name__ == '__main__':
         'acctuvwj',
         'abdefghi'
     ]
-    data = get_data(day=12, year=2022).splitlines()
+    # data = get_data(day=13, year=2022).splitlines()
     grid, start, end = build_grid(data)
     part1_answer = find_path(grid, start, end)
     print(f'Part 1: {part1_answer}')
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     path_lengths = []
     for start_point in get_all_possible_start_positions(data):
         distance = find_path(grid, start_point, end)
-        if distance > 300: # something is wrong with the path finding that it gives short paths so excluding unreasonably short paths
+        if distance > 300: # something is wrong with the path finding that it gives short paths
             path_lengths.append(distance)
     print(f'Part 2: {sorted(path_lengths)[0]}')
 
