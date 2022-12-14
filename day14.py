@@ -155,27 +155,28 @@ if __name__ == '__main__':
     start = Coordinate(500, 0)
     print(bounds)
 
-    buffer = 5
+    buffer = 1
 
     grid = []
 
     blocks = set()
+    blocks.add(Coordinate(500, 0))
     for line in lines:
         blocks = blocks.union(list(line))
 
-    for y in range(-buffer, ((bounds.SouthEast.Y - bounds.NorthEast.Y) + 1) + buffer):
+    for y in range(0, ((bounds.SouthEast.Y - bounds.NorthEast.Y) + 1) + buffer):
         grid_row = []
         for x in range(-buffer, ((bounds.NorthWest.X - bounds.NorthEast.X) + 1) + buffer):
             test_coord = Coordinate(x + bounds.NorthEast.X, y + bounds.NorthEast.Y)
             #print(test_coord)
             if test_coord in blocks:
-                grid_row.append("#")
+                grid_row.append("+" if test_coord.X == start.X and test_coord.Y == start.Y else "#")
             else:
-                grid_row.append(" ")
+                grid_row.append(".")
         grid.append(grid_row)
 
     for grid_row in grid:
-        print(grid_row)
+        print("".join(grid_row))
 
 
     #print(f'{x_range} {y_range}')
