@@ -21,10 +21,13 @@ class Bounds:
     SouthWest: Coordinate
 
 
-
 @dataclass
 class Line:
     Coordinates: list[Coordinate] = field(default_factory=list)
+
+
+
+
 
     def filled_blocks(self) -> list[Coordinate]:
         blocks = set()
@@ -144,14 +147,45 @@ if __name__ == '__main__':
         '503, 4 -> 502, 4 -> 502, 9 -> 494, 9'
     ]
 
-    # data = get_data(day=14, year=2022).splitlines()
+    #data = get_data(day=14, year=2022).splitlines()
 
     lines = [parse_line_coords(line_coords) for line_coords in data]
     bounds = get_bounds(lines)
+
+    start = Coordinate(500, 0)
     print(bounds)
 
+    buffer = 5
+
+    grid = []
+
+    blocks = set()
     for line in lines:
-        print(line)
+        blocks = blocks.union(list(line))
+
+    for y in range(-buffer, ((bounds.SouthEast.Y - bounds.NorthEast.Y) + 1) + buffer):
+        grid_row = []
+        for x in range(-buffer, ((bounds.NorthWest.X - bounds.NorthEast.X) + 1) + buffer):
+            test_coord = Coordinate(x + bounds.NorthEast.X, y + bounds.NorthEast.Y)
+            #print(test_coord)
+            if test_coord in blocks:
+                grid_row.append("#")
+            else:
+                grid_row.append(" ")
+        grid.append(grid_row)
+
+    for grid_row in grid:
+        print(grid_row)
+
+
+    #print(f'{x_range} {y_range}')
+
+    # Bounds(NorthEast=Coordinate(bounds.NorthEast.X - 10))
+
+
+
+    # for line in lines:
+    #     print(line)
 
     # grid, start, end = build_grid(data)
     # part1_answer = find_path(grid, start, end)
