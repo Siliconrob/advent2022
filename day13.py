@@ -1,102 +1,102 @@
-import string
-import typing
 from collections import deque
 from dataclasses import dataclass
+
 from aocd import get_data
-from parse import parse
-import networkx as nx
 
 
-def build_grid(input_data: list[str]) -> list[[int]]:
-    current_grid = []
-    start = ()
-    end = ()
-    for row, input_line in enumerate(input_data):
-        grid_row = []
-        for column, input_char in enumerate(input_line):
-            if input_char == 'S':
-                grid_row.append(0)
-                start = row, column
-            elif input_char == 'E':
-                grid_row.append(26)
-                end = row, column
+@dataclass
+class InputPair:
+    Left: str
+    Right: str
+    Index: int
+
+
+def read_input_pairs(input_data):
+    input_pairs = []
+    current_data = deque(input_data)
+    current_index = 1
+    while current_data:
+        input_pairs.append(InputPair(current_data.popleft(), current_data.popleft(), current_index))
+        if current_data:
+            current_data.popleft()
+        current_index += 1
+    return input_pairs
+
+
+def compare_sides(left_side, right_side):
+    if isinstance(left_side, int) and isinstance(right_side, list):
+        return compare_sides([left_side], right_side)
+    if isinstance(left_side, list) and isinstance(right_side, int):
+        return compare_sides(left_side, [right_side])
+    compares = 0
+    if isinstance(left_side, list) and isinstance(right_side, list):
+        for index, left in enumerate(left_side):
+            right = get_value(right_side, index)
+            if isinstance(left, int) and isinstance(right, int):
+                if right is None:
+                    return 1
+                if left > right:
+                    return -1
+                compares += 1
             else:
-                grid_row.append(string.ascii_lowercase.index(input_char))
-        current_grid.append(grid_row)
-    return current_grid, start, end
+                if isinstance(left, int) and isinstance(right, list):
+                    return compare_sides([left], right)
+                if isinstance(left, list) and isinstance(right, int):
+                    return compare_sides(left, [right])
+                if isinstance(left, list) and isinstance(right, list):
+                    return compare_sides(left, right)
+        if compares == 0 and len(right_side) > len(left_side):
+            return 1
+        if compares == 0 and len(left_side) > len(right_side):
+            return -1
+    return compares
 
 
-def neighbors(row: int, column: int, min: int, max_row: int, max_column: int) -> list[(int, int)]:
-    start_possible = [
-        (row + 1, column),
-        (row - 1, column),
-        (row, column + 1),
-        (row, column - 1)
-    ]
-
-    valid = []
-    for (new_row, new_column) in start_possible:
-        if new_row < min:
-            continue
-        if new_row > max_row:
-            continue
-        if new_column < min:
-            continue
-        if new_column > max_column:
-            continue
-        valid.append((new_row, new_column))
-    return valid
-
-
-def find_path(input_grid, start_point, end_point) -> int:
-    current_path = deque()
-    current_path.append((0, start_point[0], start_point[1]))
-    visited = {(start_point[0], start_point[1])}
-
-    path_found = False
-    while current_path and path_found == False:
-        distance, row, column = current_path.popleft()
-        for neighbor_row, neighbor_column in neighbors(row, column, 0, len(input_grid) - 1, len(input_grid[0]) - 1):
-            if (neighbor_row, neighbor_column) in visited:
-                continue
-            if input_grid[neighbor_row][neighbor_column] - input_grid[row][column] > 1:
-                continue
-            if neighbor_row == end_point[0] and neighbor_column == end_point[1]:
-                path_found = True
-                distance += 1
-                break
-            visited.add((neighbor_row, neighbor_column))
-            current_path.append((distance + 1, neighbor_row, neighbor_column))
-    return distance
-
-def get_all_possible_start_positions(input_data):
-    start_positions = []
-    for row, input_line in enumerate(input_data):
-        for column, input_char in enumerate(input_line):
-            if input_char == 'S' or input_char == 'a':
-                start_positions.append((row, column))
-    return start_positions
+def get_value(input_list, index):
+  try:
+    return input_list[index]
+  except IndexError:
+    return None
 
 
 if __name__ == '__main__':
     data = [
-        'Sabqponm',
-        'abcryxxl',
-        'accszExk',
-        'acctuvwj',
-        'abdefghi'
+        '[1,1,3,1,1]',
+        '[1,1,5,1,1]',
+        '',
+        '[[1],[2,3,4]]',
+        '[[1],4]',
+        '',
+        '[9]',
+        '[[8,7,6]]',
+        '',
+        '[[4,4],4,4]',
+        '[[4,4],4,4,4]',
+        '',
+        '[7,7,7,7]',
+        '[7,7,7]',
+        '',
+        '[]',
+        '[3]',
+        '',
+        '[[[]]]',
+        '[[]]',
+        '',
+        '[1,[2,[3,[4,[5,6,7]]]],8,9]',
+        '[1,[2,[3,[4,[5,6,0]]]],8,9]'
     ]
-    # data = get_data(day=13, year=2022).splitlines()
-    grid, start, end = build_grid(data)
-    part1_answer = find_path(grid, start, end)
-    print(f'Part 1: {part1_answer}')
+    data = get_data(day=13, year=2022).splitlines()
 
-    path_lengths = []
-    for start_point in get_all_possible_start_positions(data):
-        distance = find_path(grid, start_point, end)
-        if distance > 300: # something is wrong with the path finding that it gives short paths
-            path_lengths.append(distance)
-    print(f'Part 2: {sorted(path_lengths, reverse=True).pop()}')
+    sum = 0
+    for input_pair in read_input_pairs(data):
+        left_result = eval(input_pair.Left)
+        right_result = eval(input_pair.Right)
+
+        result = compare_sides(left_result, right_result)
+        if result >= 1:
+            sum += input_pair.Index
+    print(f'Part 1: {sum}')
+
 
 
 
