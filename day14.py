@@ -3,17 +3,23 @@ import string
 import typing
 from collections import deque
 from dataclasses import dataclass, field
-
 from aocd import get_data
-
 import networkx as nx
 from parse import parse
-
 
 @dataclass(frozen=True)
 class Coordinate:
     X: int
     Y: int
+
+
+@dataclass(kw_only=True, frozen=True)
+class Bounds:
+    NorthEast: Coordinate
+    SouthEast: Coordinate
+    NorthWest: Coordinate
+    SouthWest: Coordinate
+
 
 
 @dataclass
@@ -109,7 +115,7 @@ def parse_line_coords(line_coords: str) -> Line:
     return Line(edges).filled_blocks()
 
 
-def get_bounds(input_lines):
+def get_bounds(input_lines) -> Bounds:
     min_x = None
     max_x = None
     min_y = 0
@@ -125,7 +131,11 @@ def get_bounds(input_lines):
             max_x = current_coords_X[-1].X
         if max_y is None or max_y < current_coords_Y[-1].Y:
             max_y = current_coords_Y[-1].Y
-    return min_x - 1, max_x + 1, min_y, max_y
+
+    return Bounds(NorthEast=Coordinate(min_x, min_y),
+           SouthEast=Coordinate(min_x, max_y),
+           NorthWest=Coordinate(max_x, min_y),
+           SouthWest=Coordinate(max_x, max_y))
 
 
 if __name__ == '__main__':
@@ -138,6 +148,7 @@ if __name__ == '__main__':
 
     lines = [parse_line_coords(line_coords) for line_coords in data]
     bounds = get_bounds(lines)
+    print(bounds)
 
     for line in lines:
         print(line)
