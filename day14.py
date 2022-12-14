@@ -141,6 +141,20 @@ def get_bounds(input_lines) -> Bounds:
            SouthWest=Coordinate(max_x, max_y))
 
 
+def build_grid(blocks: set(), start: Coordinate, buffer=1):
+    grid = []
+    for y in range(-buffer, ((bounds.SouthEast.Y - bounds.NorthEast.Y) + 1) + buffer):
+        grid_row = []
+        for x in range(-buffer, ((bounds.NorthWest.X - bounds.NorthEast.X) + 1) + buffer):
+            test_coord = Coordinate(x + bounds.NorthEast.X, y + bounds.NorthEast.Y)
+            if test_coord in blocks:
+                grid_row.append("+" if test_coord.X == start.X and test_coord.Y == start.Y else "#")
+            else:
+                grid_row.append(".")
+        grid.append(grid_row)
+    return grid
+
+
 if __name__ == '__main__':
     data = [
         '498, 4 -> 498, 6 -> 496, 6',
@@ -155,27 +169,16 @@ if __name__ == '__main__':
     start = Coordinate(500, 0)
     print(bounds)
 
-    buffer = 1
 
-    grid = []
 
     blocks = set()
     blocks.add(Coordinate(500, 0))
     for line in lines:
         blocks = blocks.union(list(line))
 
-    for y in range(0, ((bounds.SouthEast.Y - bounds.NorthEast.Y) + 1) + buffer):
-        grid_row = []
-        for x in range(-buffer, ((bounds.NorthWest.X - bounds.NorthEast.X) + 1) + buffer):
-            test_coord = Coordinate(x + bounds.NorthEast.X, y + bounds.NorthEast.Y)
-            #print(test_coord)
-            if test_coord in blocks:
-                grid_row.append("+" if test_coord.X == start.X and test_coord.Y == start.Y else "#")
-            else:
-                grid_row.append(".")
-        grid.append(grid_row)
+    the_grid = build_grid(blocks, start)
 
-    for grid_row in grid:
+    for grid_row in the_grid:
         print("".join(grid_row))
 
 
