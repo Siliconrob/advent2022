@@ -130,6 +130,7 @@ def part1(input_lines):
     print_grid(build_grid(blocks, filled_sand, start, bounds))
     return len(filled_sand)
 
+
 def can_add_sand(start: Coordinate, current_sand: set):
     top_full = set([
         Coordinate(start.X - 1, start.Y + 1),
@@ -137,6 +138,32 @@ def can_add_sand(start: Coordinate, current_sand: set):
         Coordinate(start.X + 1, start.Y + 1),
     ])
     return top_full != current_sand & top_full
+
+
+def part2(input_lines):
+    bounds = get_bounds(input_lines)
+    bottom_line = Line([Coordinate(bounds.SouthEast.X - 1000, bounds.SouthEast.Y + 2),
+                        Coordinate(bounds.SouthWest.X + 1000, bounds.SouthWest.Y + 2)]).filled_blocks()
+    input_lines.append(bottom_line)
+    bounds = get_bounds(input_lines)
+    start = Coordinate(500, 0)
+    print(bounds)
+    blocks = set()
+    blocks.add(Coordinate(500, 0))
+    for line in input_lines:
+        blocks = blocks.union(list(line))
+    filled_sand = set()
+    current_position = start
+    while can_add_sand(start, filled_sand):
+        new_position = move_sand(current_position, blocks, filled_sand)
+        if new_position is None:
+            filled_sand.add(current_position)
+            current_position = start
+        else:
+            current_position = new_position
+    filled_sand.add(start)
+    print_grid(build_grid(blocks, filled_sand, start, bounds))
+    return len(filled_sand)
 
 
 if __name__ == '__main__':
@@ -149,30 +176,4 @@ if __name__ == '__main__':
 
     lines = [parse_line_coords(line_coords) for line_coords in data]
     print(f'Part 1: {part1(lines)}')
-
-    bounds = get_bounds(lines)
-    bottom_line = Line([Coordinate(bounds.SouthEast.X - 50, bounds.SouthEast.Y + 2),Coordinate(bounds.SouthWest.X + 50, bounds.SouthWest.Y + 2)]).filled_blocks()
-    lines.append(bottom_line)
-    bounds = get_bounds(lines)
-
-
-
-    start = Coordinate(500, 0)
-    print(bounds)
-    blocks = set()
-    blocks.add(Coordinate(500, 0))
-    for line in lines:
-        blocks = blocks.union(list(line))
-    filled_sand = set()
-    current_position = start
-
-    while can_add_sand(start, filled_sand):
-        new_position = move_sand(current_position, blocks, filled_sand)
-        if new_position is None:
-            filled_sand.add(current_position)
-            current_position = start
-        else:
-            current_position = new_position
-    filled_sand.add(start)
-    print_grid(build_grid(blocks, filled_sand, start, bounds))
-    print(f'Part 2: {len(filled_sand)}')
+    print(f'Part 2: {part2(lines)}')
