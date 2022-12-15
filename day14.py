@@ -92,15 +92,14 @@ def build_grid(blocks: set(), sand: set, start: Coordinate, bounds, buffer=1):
 
 
 def move_sand(position: Coordinate, current_blocks: set, current_sand: set):
-    filled = current_blocks.union(current_sand)
     down = Coordinate(position.X, position.Y + 1)
-    if down not in filled:
+    if down not in current_blocks and down not in current_sand:
         return down
     left = Coordinate(position.X - 1, position.Y + 1)
-    if left not in filled:
+    if left not in current_blocks and left not in current_sand:
         return left
     right = Coordinate(position.X + 1, position.Y + 1)
-    if right not in filled:
+    if right not in current_blocks and right not in current_sand:
         return right
     return None
 
@@ -142,10 +141,6 @@ def can_add_sand(start: Coordinate, current_sand: set):
 
 def part2(input_lines):
     bounds = get_bounds(input_lines)
-    bottom_line = Line([Coordinate(bounds.SouthEast.X - 1000, bounds.SouthEast.Y + 2),
-                        Coordinate(bounds.SouthWest.X + 1000, bounds.SouthWest.Y + 2)]).filled_blocks()
-    input_lines.append(bottom_line)
-    bounds = get_bounds(input_lines)
     start = Coordinate(500, 0)
     print(bounds)
     blocks = set()
@@ -154,14 +149,28 @@ def part2(input_lines):
         blocks = blocks.union(list(line))
     filled_sand = set()
     current_position = start
+
     while can_add_sand(start, filled_sand):
         new_position = move_sand(current_position, blocks, filled_sand)
         if new_position is None:
             filled_sand.add(current_position)
             current_position = start
+        elif new_position.Y == bounds.SouthEast.Y + 3:
+            blocks.add(current_position)
+            current_position = start
         else:
             current_position = new_position
     filled_sand.add(start)
+
+    blocks_by_x = list(blocks)
+    blocks_by_x.sort(key=lambda x: x.X)
+    start_x = blocks_by_x[0]
+    end_x = blocks_by_x[-1]
+    bounds = Bounds(NorthEast=Coordinate(start_x.X, bounds.NorthEast.Y),
+                    SouthEast=Coordinate(start_x.X, bounds.SouthEast.Y),
+                    NorthWest=Coordinate(end_x.X, bounds.NorthWest.Y),
+                    SouthWest=Coordinate(end_x.X, bounds.SouthWest.Y))
+
     print_grid(build_grid(blocks, filled_sand, start, bounds))
     return len(filled_sand)
 
