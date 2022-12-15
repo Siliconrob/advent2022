@@ -168,12 +168,28 @@ def part2(input_lines):
 
 if __name__ == '__main__':
     data = [
-        '498, 4 -> 498, 6 -> 496, 6',
-        '503, 4 -> 502, 4 -> 502, 9 -> 494, 9'
+        'Sensor at x=2, y=18: closest beacon is at x=-2, y=15',
+        'Sensor at x=9, y=16: closest beacon is at x=10, y=16',
+        'Sensor at x=13, y=2: closest beacon is at x=15, y=3',
+        'Sensor at x=12, y=14: closest beacon is at x=10, y=16',
+        'Sensor at x=10, y=20: closest beacon is at x=10, y=16',
+        'Sensor at x=14, y=17: closest beacon is at x=10, y=16',
+        'Sensor at x=8, y=7: closest beacon is at x=2, y=10',
+        'Sensor at x=2, y=0: closest beacon is at x=2, y=10',
+        'Sensor at x=0, y=11: closest beacon is at x=2, y=10',
+        'Sensor at x=20, y=14: closest beacon is at x=25, y=17',
+        'Sensor at x=17, y=20: closest beacon is at x=21, y=22',
+        'Sensor at x=16, y=7: closest beacon is at x=15, y=3',
+        'Sensor at x=14, y=3: closest beacon is at x=15, y=3',
+        'Sensor at x=20, y=1: closest beacon is at x=15, y=3'
     ]
 
-    # data = get_data(day=15, year=2022).splitlines()
 
-    lines = [parse_line_coords(line_coords) for line_coords in data]
-    print(f'Part 1: {part1(lines)}')
-    print(f'Part 2: {part2(lines)}')
+    # data = get_data(day=15, year=2022).splitlines()
+    for line in data:
+        print(line)
+
+
+    # lines = [parse_line_coords(line_coords) for line_coords in data]
+    # print(f'Part 1: {part1(lines)}')
+    # print(f'Part 2: {part2(lines)}')
