@@ -84,7 +84,7 @@ if __name__ == '__main__':
     data = get_data(day=15, year=2022).splitlines()
 
     scan_details = read_scan_inputs(data)
-    target_y_line = 10
+    target_y_line = 2_000_000
 
     line_infinity_bound = 10000000
     draw_line = LineString(
