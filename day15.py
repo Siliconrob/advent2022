@@ -1,13 +1,15 @@
 from dataclasses import dataclass
+from functools import reduce
+from shapely import LineString, Polygon, difference, geometry
 from aocd import get_data
 from parse import parse
-from shapely import LineString, geometry
 
 
 @dataclass(kw_only=True, frozen=True)
 class Point:
     X: int
     Y: int
+
 
 @dataclass()
 class Scan:
@@ -30,6 +32,7 @@ class Scan:
 
     def get_polygon(self):
         return geometry.Polygon([[p.x, p.y] for p in self.get_points()])
+
 
 def read_scan_inputs(input_lines):
     details = []
@@ -81,9 +84,21 @@ if __name__ == '__main__':
     data = get_data(day=15, year=2022).splitlines()
 
     scan_details = read_scan_inputs(data)
-    target_y_line = 2000000
+    target_y_line = 10
 
     line_infinity_bound = 10000000
-    draw_line = LineString([geometry.Point(line_infinity_bound * -1, target_y_line), geometry.Point(line_infinity_bound, target_y_line)])
-
+    draw_line = LineString(
+        [geometry.Point(line_infinity_bound * -1, target_y_line), geometry.Point(line_infinity_bound, target_y_line)])
     print(f'Part 1: {part1(draw_line, scan_details)}')
+
+    multiplier = 4_000_000
+    searches = multiplier
+    # Build all the polygons
+    polygons = [scanner.get_polygon() for scanner in scan_details]
+    # Reduce applies a function to arguments
+    # Then do a set different between the Polygons and this polygon which is one giant rectangle
+    # because there will be one point that is missing that, then get that center as it is between the intersections
+    found_beacon = reduce(difference, polygons,
+                          Polygon(((0, 0), (0, multiplier), (multiplier, multiplier), (multiplier, 0)))).centroid
+
+    print(f'Part 2: {(found_beacon.x * multiplier) + found_beacon.y}')
