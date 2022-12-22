@@ -15,12 +15,13 @@ def parse_input_lines(data):
 def part1(monkeys_to_search, search_monkey_id: str) -> int:
     while isinstance(monkeys_to_search[search_monkey_id], str):
         for key, value in monkeys_to_search.items():
-            if isinstance(value, int):
+            if isinstance(value, int) or isinstance(value, float):
                 for k, v in monkeys_to_search.items():
                     if isinstance(v, str):
                         monkeys_to_search[k] = v.replace(key, str(value))
                         try:
-                            monkeys_to_search[k] = int(eval(v))
+                            monkeys_to_search[k] = eval(v)
+                            break
                         except:
                             continue
     return monkeys_to_search[search_monkey_id]
