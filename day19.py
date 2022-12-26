@@ -3,21 +3,21 @@ from dataclasses import dataclass
 from aocd import get_data
 from parse import parse
 
-
-@dataclass(frozen=True)
-class CollectedMaterials:
-    Ore: int
-    Clay: int
-    Obsidian: int
-    Geode: int
-
-
-@dataclass(frozen=True)
-class RobotFleet:
-    Ore: int
-    Clay: int
-    Obsidian: int
-    Geode: int
+#
+# @dataclass(frozen=True)
+# class CollectedMaterials:
+#     Ore: int
+#     Clay: int
+#     Obsidian: int
+#     Geode: int
+#
+#
+# @dataclass(frozen=True)
+# class RobotFleet:
+#     Ore: int
+#     Clay: int
+#     Obsidian: int
+#     Geode: int
 
 
 @dataclass(frozen=True)
@@ -65,73 +65,69 @@ def best_case_scenario(initial_amount, robots, t):
     return initial_amount + robots * (t + 1) + t * (t + 1) // 2
 
 
-def search(current_time, blueprint, current_robots, collected_amounts):
+def search(start_time, blueprint):
 
 
     ORE, CLAY, OBS, GEO = range(4)
 
     best = 0
     visited = set()
-    current_search = deque([(current_time, current_robots, collected_amounts, ())])
+    current_search = deque([(start_time, 0, 0, 0, 0, 1, 0, 0, 0, ())])
+
 
     while current_search:
-        tmp = current_search.pop()
+        current_state = current_search.pop()
 
-        state = tmp[:-1]
+        state = current_state[:-1]
         if state in visited:
             continue
 
         visited.add(state)
 
-        time, current_robots, collected_amounts, did_not_build = tmp
+        current_time, ore, clay, obsidian, geode, ore_robots, clay_robots, obsidian_robots, geode_robots, did_not_build = current_state
 
-        new_ore = collected_amounts.Ore + current_robots.Ore
-        new_clay = collected_amounts.Clay + current_robots.Clay
-        new_obsidian = collected_amounts.Obsidian + current_robots.Obsidian
-        new_geode = collected_amounts.Geode + current_robots.Geode
-        time -= 1
+        new_ore = ore + ore_robots
+        new_clay = clay + clay_robots
+        new_obsidian = obsidian + obsidian_robots
+        new_geode = geode + geode_robots
+        current_time -= 1
 
-        if time == 0:
+        if current_time == 0:
             best = max(best, new_geode)
             continue
 
-        if best_case_scenario(new_geode, current_robots.Geode, time) < best:
+        if best_case_scenario(new_geode, geode_robots, current_time) < best:
             continue
 
-        if best_case_scenario(new_obsidian, current_robots.Obsidian, time) < blueprint.GeodeRobot.Obsidian or best_case_scenario(new_ore, current_robots.Ore, time) < blueprint.GeodeRobot.Ore:
-            best = max(best, new_geode + current_robots.Geode * time)
+        if best_case_scenario(new_obsidian, obsidian_robots, current_time) < blueprint.GeodeRobot.Obsidian or best_case_scenario(new_ore, ore_robots, current_time) < blueprint.GeodeRobot.Ore:
+            best = max(best, new_geode + geode_robots * current_time)
             continue
 
         can_build = []
 
-        if collected_amounts.Obsidian >= current_robots.Obsidian and current_robots.Ore >= blueprint.GeodeRobot.Ore and GEO not in did_not_build:
+        # build geode robot
+        if obsidian >= blueprint.GeodeRobot.Obsidian and ore >= blueprint.GeodeRobot.Ore and GEO not in did_not_build:
             can_build.append(GEO)
-            new_robots = RobotFleet(Ore=current_robots.Ore, Clay=current_robots.Clay, Obsidian=current_robots.Obsidian, Geode=current_robots.Geode + 1)
-            new_amounts = CollectedMaterials(Ore=new_ore - blueprint.GeodeRobot.Ore, Clay=new_clay, Obsidian=new_obsidian - blueprint.GeodeRobot.Obsidian, Geode=new_geode)
-            current_search.append((time, new_robots, new_amounts, ()))
+            current_search.append((current_time, new_ore - blueprint.GeodeRobot.Obsidian, new_clay, new_obsidian - blueprint.GeodeRobot.Obsidian, new_geode, ore_robots, clay_robots, obsidian_robots, geode_robots + 1, can_build))
 
-        if current_robots.Obsidian < blueprint.max_obsidian() and collected_amounts.Clay >= blueprint.ClayRobot.Clay and collected_amounts.Ore >= blueprint.ObsidianRobot.Ore and OBS not in did_not_build:
+        # build an obsidian robot
+        if obsidian_robots < blueprint.max_obsidian() and clay >= blueprint.ClayRobot.Clay and ore >= blueprint.ObsidianRobot.Ore and OBS not in did_not_build:
             can_build.append(OBS)
-            new_robots = RobotFleet(Ore=current_robots.Ore, Clay=current_robots.Clay, Obsidian=current_robots.Obsidian + 1, Geode=current_robots.Geode)
-            new_amounts = CollectedMaterials(Ore=new_ore - blueprint.ObsidianRobot.Ore, Clay=new_clay - blueprint.ObsidianRobot.Clay, Obsidian=new_obsidian, Geode=new_geode)
-            current_search.append((time, new_robots, new_amounts, ()))
+            current_search.append((current_time, new_ore - blueprint.ObsidianRobot.Ore, new_clay - blueprint.ObsidianRobot.Clay, new_obsidian, new_geode, ore_robots, clay_robots, obsidian_robots + 1, geode_robots, ()))
 
-        if current_robots.Clay < blueprint.max_clay() and collected_amounts.Ore >= blueprint.ClayRobot.Ore and CLAY not in did_not_build:
+        # build a clay robot
+        if clay_robots < blueprint.max_clay() and ore >= blueprint.ClayRobot.Ore and CLAY not in did_not_build:
             can_build.append(CLAY)
-            new_robots = RobotFleet(Ore=current_robots.Ore, Clay=current_robots.Clay + 1, Obsidian=current_robots.Obsidian, Geode=current_robots.Geode)
-            new_amounts = CollectedMaterials(Ore=new_ore - blueprint.ClayRobot.Ore, Clay=new_clay, Obsidian=new_obsidian, Geode=new_geode)
-            current_search.append((time, new_robots, new_amounts, ()))
+            current_search.append((current_time, new_ore - blueprint.ClayRobot.Ore, new_clay, new_obsidian, new_geode, ore_robots, clay_robots + 1, obsidian_robots, geode_robots, ()))
 
-        if current_robots.Ore < blueprint.max_ore() and collected_amounts.Ore >= blueprint.OreRobot.Ore and ORE not in did_not_build:
+        # Build an ore robot
+        if ore_robots < blueprint.max_ore() and ore >= blueprint.OreRobot.Ore and ORE not in did_not_build:
             can_build.append(ORE)
-            new_robots = RobotFleet(Ore=current_robots.Ore + 1, Clay=current_robots.Clay, Obsidian=current_robots.Obsidian, Geode=current_robots.Geode)
-            new_amounts = CollectedMaterials(Ore=new_ore - blueprint.OreRobot.Ore, Clay=new_clay, Obsidian=new_obsidian, Geode=new_geode)
-            current_search.append((time, new_robots, new_amounts, ()))
+            current_search.append((current_time, new_ore - blueprint.OreRobot.Ore, new_clay, new_obsidian, new_geode, ore_robots + 1, clay_robots, obsidian_robots, geode_robots, ()))
 
-        if (current_robots.Ore and collected_amounts.Obsidian < blueprint.max_obsidian()) or (current_robots.Clay and collected_amounts.Clay < blueprint.max_clay()) or collected_amounts.Ore < blueprint.max_ore():
-            new_robots = RobotFleet(Ore=current_robots.Ore, Clay=current_robots.Clay, Obsidian=current_robots.Obsidian, Geode=current_robots.Geode)
-            new_amounts = CollectedMaterials(Ore=new_ore, Clay=new_clay, Obsidian=new_obsidian, Geode=new_geode)
-            current_search.append((time, new_robots, new_amounts, can_build))
+        # Only collect
+        if (ore_robots and obsidian < blueprint.max_obsidian()) or (clay_robots and clay < blueprint.max_clay()) or ore < blueprint.max_ore():
+            current_search.append((current_time, new_ore, new_clay, new_obsidian, new_geode, ore_robots, clay_robots, obsidian_robots, geode_robots, can_build))
 
     return best
 
@@ -143,12 +139,17 @@ if __name__ == '__main__':
     ]
     # data = get_data(day=19, year=2022).splitlines()
 
+
     blueprints = parse_blueprints(data)
 
-    for blueprint in blueprints:
-        current_robots = RobotFleet(Ore=1, Clay=0, Obsidian=0, Geode=0)
-        collected_amounts = CollectedMaterials(Ore=0, Clay=0, Obsidian=0, Geode=0)
-        build_result = search(24, blueprint, current_robots, collected_amounts)
+    results = {}
 
-    # current_cubes = read_cubes(data)
-    # print(f'Part 1: {part1(current_cubes)}')
+    for blueprint in blueprints:
+        results[blueprint.Id] = search(24, blueprint)
+
+    part1_sum = 0
+    for key, value in results.items():
+        part1_sum += key * value
+
+    print(f'Part 1: {part1_sum}')
+
