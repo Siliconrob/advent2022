@@ -131,7 +131,7 @@ def search(current_time, blueprint, current_robots, collected_amounts):
         if (current_robots.Ore and collected_amounts.Obsidian < blueprint.max_obsidian()) or (current_robots.Clay and collected_amounts.Clay < blueprint.max_clay()) or collected_amounts.Ore < blueprint.max_ore():
             new_robots = RobotFleet(Ore=current_robots.Ore, Clay=current_robots.Clay, Obsidian=current_robots.Obsidian, Geode=current_robots.Geode)
             new_amounts = CollectedMaterials(Ore=new_ore, Clay=new_clay, Obsidian=new_obsidian, Geode=new_geode)
-            current_search.append((time, new_robots, new_amounts, ()))
+            current_search.append((time, new_robots, new_amounts, can_build))
 
     return best
 
