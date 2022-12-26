@@ -39,11 +39,10 @@ class Blueprint:
         return max(self.OreRobot.Ore, self.ClayRobot.Ore, self.ObsidianRobot.Ore, self.GeodeRobot.Ore)
 
     def max_clay(self):
-        return max(self.OreRobot.Clay, self.ClayRobot.Clay, self.ObsidianRobot.Clay, self.GeodeRobot.Clay)
+        return self.ObsidianRobot.Clay
 
     def max_obsidian(self):
-        return max(self.OreRobot.Obsidian, self.ClayRobot.Obsidian, self.ObsidianRobot.Obsidian,
-                   self.GeodeRobot.Obsidian)
+        return self.GeodeRobot.Obsidian
 
 
 def parse_blueprints(input_lines):
@@ -66,14 +65,11 @@ def best_case_scenario(initial_amount, robots, t):
 
 
 def search(start_time, blueprint):
-
-
     ORE, CLAY, OBS, GEO = range(4)
 
     best = 0
     visited = set()
     current_search = deque([(start_time, 0, 0, 0, 0, 1, 0, 0, 0, ())])
-
 
     while current_search:
         current_state = current_search.pop()
@@ -85,11 +81,10 @@ def search(start_time, blueprint):
         visited.add(state)
 
         current_time, ore, clay, obsidian, geode, ore_robots, clay_robots, obsidian_robots, geode_robots, did_not_build = current_state
-
-        new_ore = ore + ore_robots
+        new_ore  = ore  + ore_robots
         new_clay = clay + clay_robots
-        new_obsidian = obsidian + obsidian_robots
-        new_geode = geode + geode_robots
+        new_obsidian  = obsidian  + obsidian_robots
+        new_geode  = geode  + geode_robots
         current_time -= 1
 
         if current_time == 0:
@@ -108,10 +103,10 @@ def search(start_time, blueprint):
         # build geode robot
         if obsidian >= blueprint.GeodeRobot.Obsidian and ore >= blueprint.GeodeRobot.Ore and GEO not in did_not_build:
             can_build.append(GEO)
-            current_search.append((current_time, new_ore - blueprint.GeodeRobot.Obsidian, new_clay, new_obsidian - blueprint.GeodeRobot.Obsidian, new_geode, ore_robots, clay_robots, obsidian_robots, geode_robots + 1, can_build))
+            current_search.append((current_time, new_ore - blueprint.GeodeRobot.Ore, new_clay, new_obsidian - blueprint.GeodeRobot.Obsidian, new_geode, ore_robots, clay_robots, obsidian_robots, geode_robots + 1, ()))
 
         # build an obsidian robot
-        if obsidian_robots < blueprint.max_obsidian() and clay >= blueprint.ClayRobot.Clay and ore >= blueprint.ObsidianRobot.Ore and OBS not in did_not_build:
+        if obsidian_robots < blueprint.max_obsidian() and clay >= blueprint.ObsidianRobot.Clay and ore >= blueprint.ObsidianRobot.Ore and OBS not in did_not_build:
             can_build.append(OBS)
             current_search.append((current_time, new_ore - blueprint.ObsidianRobot.Ore, new_clay - blueprint.ObsidianRobot.Clay, new_obsidian, new_geode, ore_robots, clay_robots, obsidian_robots + 1, geode_robots, ()))
 
@@ -126,7 +121,7 @@ def search(start_time, blueprint):
             current_search.append((current_time, new_ore - blueprint.OreRobot.Ore, new_clay, new_obsidian, new_geode, ore_robots + 1, clay_robots, obsidian_robots, geode_robots, ()))
 
         # Only collect
-        if (ore_robots and obsidian < blueprint.max_obsidian()) or (clay_robots and clay < blueprint.max_clay()) or ore < blueprint.max_ore():
+        if (obsidian_robots and obsidian < blueprint.max_obsidian()) or (clay_robots and clay < blueprint.max_clay()) or ore < blueprint.max_ore():
             current_search.append((current_time, new_ore, new_clay, new_obsidian, new_geode, ore_robots, clay_robots, obsidian_robots, geode_robots, can_build))
 
     return best
@@ -137,19 +132,28 @@ if __name__ == '__main__':
         'Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.',
         'Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.'
     ]
-    # data = get_data(day=19, year=2022).splitlines()
+    data = get_data(day=19, year=2022).splitlines()
 
 
     blueprints = parse_blueprints(data)
 
-    results = {}
-
+    part1_results = {}
     for blueprint in blueprints:
-        results[blueprint.Id] = search(24, blueprint)
+        part1_results[blueprint.Id] = search(24, blueprint)
 
     part1_sum = 0
-    for key, value in results.items():
+    for key, value in part1_results.items():
         part1_sum += key * value
 
     print(f'Part 1: {part1_sum}')
+
+    part2_results = {}
+    for blueprint in blueprints[:3]:
+        part2_results[blueprint.Id] = search(32, blueprint)
+
+    part2_multiply = 1
+    for key, value in part2_results.items():
+        part2_multiply *= value
+
+    print(f'Part 2: {part2_multiply}')
 
