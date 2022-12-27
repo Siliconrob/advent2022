@@ -1,3 +1,4 @@
+import itertools
 from collections import deque
 from dataclasses import dataclass
 from enum import Enum
@@ -79,12 +80,19 @@ class Pointer:
 def parse_input_lines(input_lines):
     grid = {}
     instructions = None
+    max_line_length = 0
     for index, input_line in enumerate(input_lines):
+        max_line_length = len(input_line) if max_line_length < len(input_line) else max_line_length
         if input_line == '':
             instructions = input_lines[index + 1]
             break
         else:
+            if len(input_line) < max_line_length:
+                repeats = max_line_length - len(input_line)
+                for space in range(0, repeats):
+                    input_line += ' '
             grid[index] = list(input_line)
+
 
     current_pointer = Pointer(x=grid[0].index('#') - 1, y=0)
     return grid, parse_instructions(instructions), current_pointer
