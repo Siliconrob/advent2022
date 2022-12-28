@@ -1,3 +1,5 @@
+from collections import Counter
+
 from aocd import get_data
 from shapely import LineString, Polygon, difference, geometry, LinearRing
 
@@ -6,90 +8,87 @@ def parse_input(input_data):
 	for y_index, row in enumerate(input_data):
 		for x_index, position_value in enumerate(row):
 			if position_value == '#':
-				elves.add(f'{x_index}_{y_index}')
+				elves.add((x_index, y_index))
 	return elves
-
-
-def read_key(input):
-	splits = input.split('_')
-	return int(splits[0]), int(splits[1])
 
 
 def all_positions(x, y):
 	return set([
-		f'{x - 1}_{y - 1}', #NW
-		f'{x - 1}_{y}',  # W
-		f'{x - 1}_{y + 1}',  # SW
-		f'{x}_{y - 1}', #N
-		f'{x}_{y + 1}',  # S
-		f'{x + 1}_{y - 1}',  # NE
-		f'{x + 1}_{y}',  # E
-		f'{x + 1}_{y + 1}',  # SE
+		(x - 1, y - 1), #NW
+		(x - 1, y),  # W
+		(x - 1, y + 1),  # SW
+		(x, y - 1), #N
+		(x, y + 1),  # S
+		(x + 1, y - 1),  # NE
+		(x + 1, y),  # E
+		(x + 1, y + 1),  # SE
 	])
 
 def north_positions(x, y):
 	return set([
-		f'{x - 1}_{y - 1}', #NW
-		f'{x}_{y - 1}', #N
-		f'{x + 1}_{y - 1}' #NE
+		(x - 1,y - 1), #NW
+		(x,y - 1), #N
+		(x + 1,y - 1) #NE
 	])
 
 def south_positions(x, y):
 	return set([
-		f'{x - 1}_{y + 1}', #SW
-		f'{x}_{y + 1}', #S
-		f'{x + 1}_{y + 1}' #SE
+		(x - 1,y + 1), #SW
+		(x,y + 1), #S
+		(x + 1,y + 1) #SE
 	])
 
 
 def west_positions(x, y):
 	return set([
-		f'{x - 1}_{y - 1}', #NW
-		f'{x - 1 }_{y}', #W
-		f'{x - 1}_{y + 1}' #SW
+		(x - 1,y - 1), #NW
+		(x - 1 ,y), #W
+		(x - 1,y + 1) #SW
 	])
 
 
 def east_positions(x, y):
 	return set([
-		f'{x + 1}_{y - 1}', #NE
-		f'{x + 1}_{y}', #E
-		f'{x + 1}_{y + 1}' #SE
+		(x + 1,y - 1), #NE
+		(x + 1,y), #E
+		(x + 1,y + 1) #SE
 	])
 
 def move(input_elf_frame, round):
 	proposed_elf_frame = []
 
-	for _, key in enumerate(input_elf_frame):
-		x, y = read_key(key)
+	for _, position in enumerate(input_elf_frame):
+		x, y = position
 		all = all_positions(x, y)
 		if all.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append(key)
+			proposed_elf_frame.append(position)
 			continue
 		north = north_positions(x, y)
 		if north.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append(f'{x}_{y - 1}')
+			proposed_elf_frame.append((x, y - 1))
 			continue
 		south = south_positions(x, y)
 		if south.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append(f'{x}_{y + 1}')
+			proposed_elf_frame.append((x ,y + 1))
 			continue
 		west = west_positions(x, y)
 		if west.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append(f'{x - 1}_{y}')
+			proposed_elf_frame.append((x - 1,y))
 			continue
 		east = east_positions(x, y)
 		if east.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append(f'{x + 1}_{y}')
+			proposed_elf_frame.append((x + 1, y))
 			continue
 		else:
-		 	proposed_elf_frame.append(key)
+		 	proposed_elf_frame.append(position)
 
 	next_elf_frame = set()
+	next_counts = Counter(proposed_elf_frame)
+
 	for old, new in zip(input_elf_frame, proposed_elf_frame):
 		if old == new:
 			next_elf_frame.add(old)
-		elif proposed_elf_frame.count(new) > 1:
+		elif next_counts[new] > 1:
 			next_elf_frame.add(old)
 		else:
 			next_elf_frame.add(new)
@@ -108,18 +107,13 @@ def part1(elves):
 def show_map(input_elves):
 	empties = 0
 
-	x_list = []
-	y_list = []
-	for _, key in enumerate(input_elves):
-		x, y = read_key(key)
-		x_list.append(x)
-		y_list.append(y)
+	x_list = [x for x, y in input_elves]
+	y_list = [y for x, y in input_elves]
 
-	coords = list(zip(x_list, y_list))
 	for y_index in range(min(y_list), max(y_list) + 1):
 		row = ''
 		for x_index in range(min(x_list), max(x_list) + 1):
-			if (x_index, y_index) in coords:
+			if (x_index, y_index) in input_elves:
 				row += '#'
 			else:
 				row += '.'
