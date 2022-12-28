@@ -129,36 +129,40 @@ def parse_instructions(instructions_input):
     return instruction_queue
 
 
+def part1(input_data):
+	grid, instructions, the_pointer = parse_input_lines(input_data)
+	for instruction in instructions:
+		if isinstance(instruction, Turn):
+			the_pointer.turn(instruction)
+			continue
+		grid[the_pointer.y][the_pointer.x] = '.'
+		for move in range(0, instruction):
+			the_pointer.move(1, grid)
+		grid[the_pointer.y][the_pointer.x] = the_pointer.pointer_character()
+	return compute_answer(the_pointer.x, the_pointer.y, the_pointer.Direction)
+
+
+def compute_answer(x,y, direction):
+	return (1000 * (y + 1)) + (4 * (x + 1)) + direction
+
+
 if __name__ == '__main__':
-    data = [
-        '        ...#',
-        '        .#..',
-        '        #...',
-        '        ....',
-        '...#.......#',
-        '........#...',
-        '..#....#....',
-        '..........#.',
-        '        ...#....',
-        '        .....#..',
-        '        .#......',
-        '        ......#.',
-        '',
-        '10R5L5R10L4R5L5'
-    ]
-    data = get_data(day=22, year=2022).splitlines()
-    grid, instructions, the_pointer = parse_input_lines(data)
+	data = [
+		'        ...#',
+		'        .#..',
+		'        #...',
+		'        ....',
+		'...#.......#',
+		'........#...',
+		'..#....#....',
+		'..........#.',
+		'        ...#....',
+		'        .....#..',
+		'        .#......',
+		'        ......#.',
+		'',
+		'10R5L5R10L4R5L5'
+	]
+	data = get_data(day=22, year=2022).splitlines()
 
-    for instruction in instructions:
-        if isinstance(instruction, Turn):
-            the_pointer.turn(instruction)
-            print_map(grid, the_pointer)
-            continue
-        grid[the_pointer.y][the_pointer.x] = '.'
-        for move in range(0, instruction):
-            the_pointer.move(1, grid)
-        grid[the_pointer.y][the_pointer.x] = the_pointer.pointer_character()
-        print_map(grid, the_pointer)
-
-    part1_answer = (1000 * (the_pointer.y + 1)) + (4 * (the_pointer.x + 1)) + the_pointer.Direction
-    print(f'Part 1: {part1_answer}')
+	print(f'Part 1: {part1(data)}')
