@@ -1,7 +1,9 @@
-from collections import Counter
-
+from collections import Counter, deque
 from aocd import get_data
 from shapely import LineString, Polygon, difference, geometry, LinearRing
+
+
+
 
 def parse_input(input_data):
 	elves = set()
@@ -54,8 +56,35 @@ def east_positions(x, y):
 		(x + 1,y + 1) #SE
 	])
 
-def move(input_elf_frame, round):
+def check_north(x, y, input_elfs):
+	positions = north_positions(x, y)
+	if positions.isdisjoint(input_elfs):
+		return x, y - 1
+	return None, None
+
+def check_south(x, y, input_elfs):
+	positions = south_positions(x, y)
+	if positions.isdisjoint(input_elfs):
+		return x, y + 1
+	return None, None
+
+def check_west(x, y, input_elfs):
+	positions = west_positions(x, y)
+	if positions.isdisjoint(input_elfs):
+		return x - 1, y
+	return None, None
+
+
+def check_east(x, y, input_elfs):
+	positions = east_positions(x, y)
+	if positions.isdisjoint(input_elfs):
+		return x + 1, y
+	return None, None
+
+
+def move(input_elf_frame, round, move_check_fns):
 	proposed_elf_frame = []
+
 
 	for _, position in enumerate(input_elf_frame):
 		x, y = position
@@ -63,21 +92,21 @@ def move(input_elf_frame, round):
 		if all.isdisjoint(input_elf_frame):
 			proposed_elf_frame.append(position)
 			continue
-		north = north_positions(x, y)
-		if north.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append((x, y - 1))
+		new_x, new_y = move_check_fns[0](x, y, input_elf_frame)
+		if new_x is not None and new_y is not None:
+			proposed_elf_frame.append((new_x, new_y))
 			continue
-		south = south_positions(x, y)
-		if south.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append((x ,y + 1))
+		new_x, new_y = move_check_fns[1](x, y, input_elf_frame)
+		if new_x is not None and new_y is not None:
+			proposed_elf_frame.append((new_x, new_y))
 			continue
-		west = west_positions(x, y)
-		if west.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append((x - 1,y))
+		new_x, new_y = move_check_fns[2](x, y, input_elf_frame)
+		if new_x is not None and new_y is not None:
+			proposed_elf_frame.append((new_x, new_y))
 			continue
-		east = east_positions(x, y)
-		if east.isdisjoint(input_elf_frame):
-			proposed_elf_frame.append((x + 1, y))
+		new_x, new_y = move_check_fns[3](x, y, input_elf_frame)
+		if new_x is not None and new_y is not None:
+			proposed_elf_frame.append((new_x, new_y))
 			continue
 		else:
 		 	proposed_elf_frame.append(position)
@@ -98,9 +127,13 @@ def move(input_elf_frame, round):
 
 
 def part1(elves):
+
+	move_fns = deque((check_north, check_south, check_west, check_east))
+
 	show_map(elves)
 	for round in range(0, 10):
-		elves = move(elves, round)
+		elves = move(elves, round, move_fns)
+		move_fns.rotate(-1)
 		empties = show_map(elves)
 
 
@@ -124,6 +157,15 @@ def show_map(input_elves):
 
 
 if __name__ == '__main__':
+	# data = [
+	# 	'.....',
+	# 	'..##.',
+	# 	'..#..',
+	# 	'.....',
+	# 	'..##.',
+	# 	'.....'
+	# ]
+
 	data = [
 		'....#..',
 		'..###.#',
@@ -132,17 +174,9 @@ if __name__ == '__main__':
 		'#.###..',
 		'##.#.##',
 		'.#..#..'
-    ]
-
-	data = [
-		'.....',
-		'..##.',
-		'..#..',
-		'.....',
-		'..##.',
-		'.....'
 	]
-    #data = get_data(day=23, year=2022).splitlines()
+
+	data = get_data(day=23, year=2022).splitlines()
 	elves = parse_input(data)
 
 	part1_answer = part1(elves)
