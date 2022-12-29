@@ -122,19 +122,33 @@ def move(input_elf_frame, round, move_check_fns):
 		else:
 			next_elf_frame.add(new)
 
-	return next_elf_frame
+	stop = True if next_elf_frame.intersection(input_elf_frame) == input_elf_frame else False
+
+	return next_elf_frame, stop
 
 
 
 def part1(elves):
-
 	move_fns = deque((check_north, check_south, check_west, check_east))
-
-	show_map(elves)
+	# show_map(elves)
 	for round in range(0, 10):
-		elves = move(elves, round, move_fns)
+		elves, stop = move(elves, round, move_fns)
 		move_fns.rotate(-1)
 		empties = show_map(elves)
+	return empties
+
+def part2(elves):
+	move_fns = deque((check_north, check_south, check_west, check_east))
+	# show_map(elves)
+	round = 0
+	while True:
+		elves, stop = move(elves, round, move_fns)
+		if stop:
+			break
+		round += 1
+		move_fns.rotate(-1)
+		# empties = show_map(elves)
+	return round + 1
 
 
 def show_map(input_elves):
@@ -181,3 +195,6 @@ if __name__ == '__main__':
 
 	part1_answer = part1(elves)
 	print(f'Part 1: {part1_answer}')
+
+	part2_answer = part2(elves)
+	print(f'Part 2: {part2_answer}')
